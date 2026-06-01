@@ -396,3 +396,14 @@ tr:last-child td {
     height: 8px;
     border-radius: 50%;
 }
+
+.nav-item.active .nav-link {
+    background: #ffffff;
+    color: #052241;
+    font-weight: 600;
+    border-radius: 12px;
+}
+
+.nav-item.active .nav-link i {
+    color: #052241;
+}
