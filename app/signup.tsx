@@ -2,16 +2,16 @@ import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Animated,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Animated,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 const COLORS = {
@@ -25,13 +25,15 @@ const COLORS = {
   inputBorder: '#E2E8F0',
 };
 
-export default function LoginScreen() {
-  const router = useRouter(); 
+export default function SignUpScreen() {
+  const router = useRouter();
 
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  // Entrance Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
 
@@ -42,7 +44,8 @@ export default function LoginScreen() {
     ]).start();
   }, []);
 
-  const handleLogin = () => {
+  const handleSignUp = () => {
+    // After signing up, replace the screen with the home screen
     router.replace('/home'); 
   };
 
@@ -60,22 +63,38 @@ export default function LoginScreen() {
             { opacity: fadeAnim, transform: [{ translateY: slideUpAnim }] }
           ]}
         >
-          {/* --- Branding / Icon --- */}
-          <View style={styles.logoContainer}>
-            <View style={styles.iconCircle}>
-              <Feather name="shield" size={40} color={COLORS.primaryBlue} />
-            </View>
+          {/* --- Top Bar / Back Button --- */}
+          <View style={styles.topBar}>
+            <TouchableOpacity 
+              style={styles.backBtn} 
+              onPress={() => router.back()} // Goes back to the previous screen (Login)
+            >
+              <Feather name="arrow-left" size={24} color={COLORS.textDark} />
+            </TouchableOpacity>
           </View>
 
           {/* --- Header Texts --- */}
           <View style={styles.headerContainer}>
-            <Text style={styles.welcomeText}>Welcome back 👋</Text>
-            <Text style={styles.subText}>Log in to receive real-time disaster alerts and stay safe.</Text>
+            <Text style={styles.titleText}>Create Account ✨</Text>
+            <Text style={styles.subText}>Sign up to get real-time disaster alerts and stay protected.</Text>
           </View>
 
           {/* --- Form Inputs --- */}
           <View style={styles.formContainer}>
             
+            {/* Full Name Input */}
+            <View style={styles.inputWrapper}>
+              <Feather name="user" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Full Name"
+                placeholderTextColor={COLORS.textMuted}
+                autoCapitalize="words"
+                value={name}
+                onChangeText={setName}
+              />
+            </View>
+
             {/* Email Input */}
             <View style={styles.inputWrapper}>
               <Feather name="mail" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
@@ -95,7 +114,7 @@ export default function LoginScreen() {
               <Feather name="lock" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="Password"
+                placeholder="Create Password"
                 placeholderTextColor={COLORS.textMuted}
                 secureTextEntry={!showPassword}
                 value={password}
@@ -113,27 +132,22 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Forgot Password */}
-            <TouchableOpacity style={styles.forgotPasswordBtn}>
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
-
-            {/* Login Button */}
+            {/* Sign Up Button */}
             <TouchableOpacity 
-              style={styles.loginBtn} 
-              onPress={() => router.replace('/home')}
+              style={styles.signUpBtn} 
+              onPress={handleSignUp}
               activeOpacity={0.8}
             >
-              <Text style={styles.loginBtnText}>Log In</Text>
+              <Text style={styles.signUpBtnText}>Sign Up</Text>
             </TouchableOpacity>
           </View>
 
-          {/* --- Footer Sign Up --- */}
+          {/* --- Footer Log In --- */}
           <View style={styles.footerContainer}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
-            <TouchableOpacity 
-              onPress={() => router.push('/signup')}>
-              <Text style={styles.signUpText}>Sign up</Text>
+            <Text style={styles.footerText}>Already have an account? </Text>
+            {/* Navigates back to the Login index */}
+            <TouchableOpacity onPress={() => router.back()}>
+              <Text style={styles.logInText}>Log In</Text>
             </TouchableOpacity>
           </View>
 
@@ -153,27 +167,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     justifyContent: 'center',
   },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 32,
+  topBar: {
+    position: 'absolute',
+    top: Platform.OS === 'android' ? 20 : 0,
+    left: 24,
+    zIndex: 10,
   },
-  iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: COLORS.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: COLORS.primaryBlue,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 5,
+  backBtn: {
+    padding: 8,
+    marginLeft: -8, // Offset the padding so the icon aligns perfectly with the text
   },
   headerContainer: {
     marginBottom: 40,
+    marginTop: 40, // Added margin to clear the back button
   },
-  welcomeText: {
+  titleText: {
     fontSize: 28,
     fontWeight: '800',
     color: COLORS.textDark,
@@ -208,28 +216,20 @@ const styles = StyleSheet.create({
   eyeIcon: {
     padding: 8,
   },
-  forgotPasswordBtn: {
-    alignSelf: 'flex-end',
-    marginBottom: 32,
-  },
-  forgotPasswordText: {
-    color: COLORS.primaryBlue,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  loginBtn: {
+  signUpBtn: {
     backgroundColor: COLORS.primaryBlue,
     borderRadius: 16,
     height: 60,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 16, // Added extra space above the button
     shadowColor: COLORS.primaryBlue,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,
   },
-  loginBtnText: {
+  signUpBtnText: {
     color: COLORS.white,
     fontSize: 16,
     fontWeight: 'bold',
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     fontSize: 14,
   },
-  signUpText: {
+  logInText: {
     color: COLORS.primaryBlue,
     fontSize: 14,
     fontWeight: 'bold',

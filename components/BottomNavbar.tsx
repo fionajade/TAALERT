@@ -28,7 +28,7 @@ const BottomNavbar = ({ activeTab }: { activeTab: string }) => {
         <NavButton
           icon="home"
           isActive={activeTab === 'home'}
-          onPress={() => router.replace('/')}
+          onPress={() => router.replace('/home')}
         />
         <NavButton
           icon="map"
