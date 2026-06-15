@@ -1,24 +1,37 @@
 import { Feather } from '@expo/vector-icons';
-import React, { useEffect, useRef } from 'react'; // Added useEffect and useRef
+import { useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
+  KeyboardAvoidingView,
+  Platform,
   SafeAreaView,
-  ScrollView,
   StatusBar,
+  StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
-import BottomNavbar from '../components/BottomNavbar';
-import { COLORS, IndexStyles as styles } from '../constants/theme';
 
-const RECENT_ACTIVITY_DATA = [
-  { id: '1', type: 'UPDATE', title: 'PHIVOLCS Bulletin #142', description: 'Sulfur dioxide emission averaged 1,432 tonnes/day.', time: '12m' },
-  { id: '2', type: 'REPORT', title: 'Ashfall observed in Agoncillo', description: 'Light ashfall reported by 4 residents within 1km.', time: '38m' },
-  { id: '3', type: 'SAFE', title: 'Evac center San Nicolas open', description: 'Capacity 240 · supplies stocked for 72hrs.', time: '1h' },
-];
+const COLORS = {
+  background: '#F5F7FA',
+  primaryBlue: '#319EFE', 
+  darkNavy: '#223354',    
+  textDark: '#1A202C',
+  textMuted: '#718096',
+  white: '#FFFFFF',
+  inputBg: '#FFFFFF',
+  inputBorder: '#E2E8F0',
+};
 
-export default function DisasterAppUI() {
+export default function LoginScreen() {
+  const router = useRouter(); 
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
 
@@ -29,121 +42,210 @@ export default function DisasterAppUI() {
     ]).start();
   }, []);
 
+  const handleLogin = () => {
+    router.replace('/home'); 
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <Animated.View style={{ flex: 1, opacity: fadeAnim, transform: [{ translateY: slideUpAnim }] }}>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
-        <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <Animated.View 
+          style={[
+            styles.innerContainer, 
+            { opacity: fadeAnim, transform: [{ translateY: slideUpAnim }] }
+          ]}
         >
-          {/* --- Header --- */}
-          <View style={styles.header}>
-            <View>
-              <Text style={styles.greetingText}>Hello,</Text>
-              <Text style={styles.nameText}>Marcus 👋</Text>
+          {/* --- Branding / Icon --- */}
+          <View style={styles.logoContainer}>
+            <View style={styles.iconCircle}>
+              <Feather name="shield" size={40} color={COLORS.primaryBlue} />
             </View>
-            <TouchableOpacity style={styles.notificationBtn}>
-              <Feather name="bell" color={COLORS.primaryBlue} size={24} />
-              <View style={styles.notificationDot} />
+          </View>
+
+          {/* --- Header Texts --- */}
+          <View style={styles.headerContainer}>
+            <Text style={styles.welcomeText}>Welcome back 👋</Text>
+            <Text style={styles.subText}>Log in to receive real-time disaster alerts and stay safe.</Text>
+          </View>
+
+          {/* --- Form Inputs --- */}
+          <View style={styles.formContainer}>
+            
+            {/* Email Input */}
+            <View style={styles.inputWrapper}>
+              <Feather name="mail" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Email address"
+                placeholderTextColor={COLORS.textMuted}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email}
+                onChangeText={setEmail}
+              />
+            </View>
+
+            {/* Password Input */}
+            <View style={styles.inputWrapper}>
+              <Feather name="lock" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                placeholderTextColor={COLORS.textMuted}
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+              />
+              <TouchableOpacity 
+                style={styles.eyeIcon} 
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Feather 
+                  name={showPassword ? "eye" : "eye-off"} 
+                  size={20} 
+                  color={COLORS.textMuted} 
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* Forgot Password */}
+            <TouchableOpacity style={styles.forgotPasswordBtn}>
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </TouchableOpacity>
+
+            {/* Login Button */}
+            <TouchableOpacity 
+              style={styles.loginBtn} 
+              onPress={() => router.replace('/home')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.loginBtnText}>Log In</Text>
             </TouchableOpacity>
           </View>
 
-          {/* --- Status Card --- */}
-          <View style={styles.statusCard}>
-            <View style={styles.statusHeader}>
-              <Feather name="shield" color={COLORS.white} size={16} />
-              <Text style={styles.statusHeaderText}>CURRENT STATUS</Text>
-            </View>
-            <Text style={styles.volcanoName}>Taal Volcano</Text>
-            <Text style={styles.alertLevel}>Alert Level 1 · Normal conditions</Text>
-
-            <View style={styles.statusBadgesRow}>
-              <View style={styles.statusBadge}>
-                <Text style={styles.statusBadgeText}>Updated 2 min ago</Text>
-              </View>
-              <View style={styles.statusBadge}>
-                <Feather name="wind" color={COLORS.white} size={14} style={{ marginRight: 4 }} />
-                <Text style={styles.statusBadgeText}>SW wind</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* --- Quick Actions --- */}
-          <Text style={styles.sectionTitle}>QUICK ACTIONS</Text>
-          <View style={styles.quickActionsContainer}>
-            <TouchableOpacity style={styles.sosCard}>
-              <View style={styles.sosIconContainer}>
-                <Feather name="alert-circle" color={COLORS.white} size={28} />
-              </View>
-              <View>
-                <Text style={styles.sosTitle}>Emergency{'\n'}SOS</Text>
-                <Text style={styles.sosSub}>Hold to alert responders</Text>
-              </View>
-            </TouchableOpacity>
-
-            <View style={styles.rightActionsColumn}>
-              <TouchableOpacity style={styles.actionCard}>
-                <View style={styles.actionIconContainer}>
-                  <Feather name="phone" color={COLORS.primaryBlue} size={20} />
-                </View>
-                <Text style={styles.actionTitle}>Hotlines</Text>
-                <Text style={styles.actionSub}>911 · PHIVOLCS</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.actionCard}>
-                <View style={styles.actionIconContainer}>
-                  <Feather name="plus-square" color={COLORS.primaryBlue} size={20} />
-                </View>
-                <Text style={styles.actionTitle}>Shelters</Text>
-                <Text style={styles.actionSub}>3 nearby</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* --- Recent Activity --- */}
-          <View style={styles.activityHeader}>
-            <Text style={styles.sectionTitleDark}>Recent Activity</Text>
+          {/* --- Footer Sign Up --- */}
+          <View style={styles.footerContainer}>
+            <Text style={styles.footerText}>Don't have an account? </Text>
             <TouchableOpacity>
-              <Text style={styles.seeAllText}>See all</Text>
+              <Text style={styles.signUpText}>Sign up</Text>
             </TouchableOpacity>
           </View>
 
-          {RECENT_ACTIVITY_DATA.map((item) => (
-            <View key={item.id} style={styles.activityCard}>
-              <View style={styles.activityCardHeader}>
-                <View style={[
-                  styles.activityBadge,
-                  item.type === 'UPDATE' && { backgroundColor: COLORS.badgeUpdateBg },
-                  item.type === 'REPORT' && { backgroundColor: COLORS.badgeReportBg },
-                  item.type === 'SAFE' && { backgroundColor: COLORS.badgeSafeBg },
-                ]}>
-                  <Text style={[
-                    styles.activityBadgeText,
-                    item.type === 'UPDATE' && { color: COLORS.badgeUpdateText },
-                    item.type === 'REPORT' && { color: COLORS.badgeReportText },
-                    item.type === 'SAFE' && { color: COLORS.badgeSafeText },
-                  ]}>
-                    {item.type}
-                  </Text>
-                </View>
-                <View style={styles.timeContainer}>
-                  <Feather name="activity" color={COLORS.textMuted} size={14} style={{ marginRight: 4 }} />
-                  <Text style={styles.timeText}>{item.time}</Text>
-                </View>
-              </View>
-              <Text style={styles.activityTitle}>{item.title}</Text>
-              <Text style={styles.activityDesc}>{item.description}</Text>
-            </View>
-          ))}
-
-          <View style={{ height: 100 }} />
-        </ScrollView>
-      </Animated.View>
-
-      <BottomNavbar activeTab="home" />
+        </Animated.View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  innerContainer: {
+    flex: 1,
+    paddingHorizontal: 24,
+    justifyContent: 'center',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  iconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: COLORS.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: COLORS.primaryBlue,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  headerContainer: {
+    marginBottom: 40,
+  },
+  welcomeText: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: COLORS.textDark,
+    marginBottom: 8,
+  },
+  subText: {
+    fontSize: 15,
+    color: COLORS.textMuted,
+    lineHeight: 22,
+  },
+  formContainer: {
+    marginBottom: 24,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.inputBg,
+    borderRadius: 16, 
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    height: 60,
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: COLORS.textDark,
+    height: '100%',
+  },
+  eyeIcon: {
+    padding: 8,
+  },
+  forgotPasswordBtn: {
+    alignSelf: 'flex-end',
+    marginBottom: 32,
+  },
+  forgotPasswordText: {
+    color: COLORS.primaryBlue,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  loginBtn: {
+    backgroundColor: COLORS.primaryBlue,
+    borderRadius: 16,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: COLORS.primaryBlue,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  loginBtnText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  footerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  footerText: {
+    color: COLORS.textMuted,
+    fontSize: 14,
+  },
+  signUpText: {
+    color: COLORS.primaryBlue,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+});
