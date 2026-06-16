@@ -13,7 +13,6 @@ export const supabase = createClient(
   supabasePublishableKey,
   {
     auth: {
-      // Use AsyncStorage only on native platforms
       storage: isWeb ? undefined : AsyncStorage,
       autoRefreshToken: true,
       persistSession: true,
