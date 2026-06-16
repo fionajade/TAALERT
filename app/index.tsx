@@ -15,7 +15,7 @@ import {
   View,
 } from 'react-native';
 
-import { supabase } from '../src/services/supabase'; // Make sure this path is correct for your project
+import { supabase } from '../src/services/supabase';
 
 const COLORS = {
   background: '#F5F7FA',
@@ -62,7 +62,6 @@ export default function LoginScreen() {
 
       setLoading(true);
 
-      // Simplified Login: Exactly like your working code
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
@@ -72,9 +71,8 @@ export default function LoginScreen() {
         Alert.alert('Login Failed', error.message);
         return;
       }
-
-      // If successful, bypass the complex 'users' table check for the presentation
-      // and go straight to the home screen.
+      
+      // BASTA PAG SUCCESSFUL PUNTA HOME
       router.replace('/home');
 
     } catch (err) {
@@ -102,14 +100,14 @@ export default function LoginScreen() {
             },
           ]}
         >
-          {/* ICON */}
+          {/* Icon */}
           <View style={styles.logoContainer}>
             <View style={styles.iconCircle}>
               <Feather name="shield" size={40} color={COLORS.primaryBlue} />
             </View>
           </View>
 
-          {/* HEADER */}
+          {/* Header */}
           <View style={styles.headerContainer}>
             <Text style={styles.welcomeText}>Welcome back 👋</Text>
             <Text style={styles.subText}>
@@ -117,9 +115,9 @@ export default function LoginScreen() {
             </Text>
           </View>
 
-          {/* FORM */}
+          {/* Form */}
           <View style={styles.formContainer}>
-            {/* EMAIL */}
+            {/* Email */}
             <View style={styles.inputWrapper}>
               <Feather name="mail" size={20} color={COLORS.textMuted} />
               <TextInput
@@ -133,7 +131,7 @@ export default function LoginScreen() {
               />
             </View>
 
-            {/* PASSWORD */}
+            {/* Password */}
             <View style={styles.inputWrapper}>
               <Feather name="lock" size={20} color={COLORS.textMuted} />
               <TextInput
@@ -155,12 +153,12 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* FORGOT */}
+            {/* Forgot */}
             <TouchableOpacity style={styles.forgotPasswordBtn}>
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 
-            {/* LOGIN BUTTON */}
+            {/* Login */}
             <TouchableOpacity
               style={styles.loginBtn}
               onPress={handleLogin}
@@ -173,7 +171,7 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* SIGNUP */}
+          {/* Signup */}
           <View style={styles.footerContainer}>
             <Text style={styles.footerText}>Don't have an account? </Text>
 
