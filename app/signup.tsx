@@ -2,17 +2,21 @@ import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Animated,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  Animated,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
+
+// Import your Supabase client (make sure this path matches your project)
+import { supabase } from '../src/services/supabase';
 
 const COLORS = {
   background: '#F5F7FA',
@@ -32,6 +36,7 @@ export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false); // Added for loading state
 
   // Entrance Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -44,9 +49,37 @@ export default function SignUpScreen() {
     ]).start();
   }, []);
 
-  const handleSignUp = () => {
-    // After signing up, replace the screen with the home screen
-    router.replace('/home'); 
+  const handleSignUp = async () => {
+    // Prevent empty submissions
+    if (!email || !password) {
+      Alert.alert('Hold on!', 'Please enter an email and password.');
+      return;
+    }
+
+    setLoading(true);
+
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        data: {
+          full_name: name, // Saves the user's name in Supabase Auth!
+        }
+      }
+    });
+
+    setLoading(false);
+
+    if (error) {
+      Alert.alert('Error', error.message);
+    } else {
+      Alert.alert('Success!', 'Check your email for the confirmation link.');
+      // If email confirmation is disabled in Supabase, you can immediately route to home:
+      router.replace('/home'); 
+      
+      // If email confirmation IS required, navigate them back to log in:
+      // router.back();
+    }
   };
 
   return (
@@ -67,7 +100,7 @@ export default function SignUpScreen() {
           <View style={styles.topBar}>
             <TouchableOpacity 
               style={styles.backBtn} 
-              onPress={() => router.back()} // Goes back to the previous screen (Login)
+              onPress={() => router.back()} 
             >
               <Feather name="arrow-left" size={24} color={COLORS.textDark} />
             </TouchableOpacity>
@@ -134,18 +167,20 @@ export default function SignUpScreen() {
 
             {/* Sign Up Button */}
             <TouchableOpacity 
-              style={styles.signUpBtn} 
+              style={[styles.signUpBtn, loading && { opacity: 0.7 }]} 
               onPress={handleSignUp}
               activeOpacity={0.8}
+              disabled={loading} // Disables button while loading
             >
-              <Text style={styles.signUpBtnText}>Sign Up</Text>
+              <Text style={styles.signUpBtnText}>
+                {loading ? 'Signing Up...' : 'Sign Up'}
+              </Text>
             </TouchableOpacity>
           </View>
 
           {/* --- Footer Log In --- */}
           <View style={styles.footerContainer}>
             <Text style={styles.footerText}>Already have an account? </Text>
-            {/* Navigates back to the Login index */}
             <TouchableOpacity onPress={() => router.back()}>
               <Text style={styles.logInText}>Log In</Text>
             </TouchableOpacity>
@@ -175,11 +210,11 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     padding: 8,
-    marginLeft: -8, // Offset the padding so the icon aligns perfectly with the text
+    marginLeft: -8, 
   },
   headerContainer: {
     marginBottom: 40,
-    marginTop: 40, // Added margin to clear the back button
+    marginTop: 40, 
   },
   titleText: {
     fontSize: 28,
@@ -222,7 +257,7 @@ const styles = StyleSheet.create({
     height: 60,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 16, // Added extra space above the button
+    marginTop: 16, 
     shadowColor: COLORS.primaryBlue,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,

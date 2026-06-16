@@ -2,6 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  Alert,
   Animated,
   KeyboardAvoidingView,
   Platform,
@@ -14,7 +15,7 @@ import {
   View,
 } from 'react-native';
 
-import { supabase } from '../src/services/supabase';
+import { supabase } from '../src/services/supabase'; // Make sure this path is correct for your project
 
 const COLORS = {
   background: '#F5F7FA',
@@ -53,28 +54,35 @@ export default function LoginScreen() {
   }, []);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      console.log('Missing email or password');
-      return;
+    try {
+      if (!email.trim() || !password.trim()) {
+        Alert.alert('Error', 'Please enter your email and password');
+        return;
+      }
+
+      setLoading(true);
+
+      // Simplified Login: Exactly like your working code
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (error) {
+        Alert.alert('Login Failed', error.message);
+        return;
+      }
+
+      // If successful, bypass the complex 'users' table check for the presentation
+      // and go straight to the home screen.
+      router.replace('/home');
+
+    } catch (err) {
+      console.log('Catch Error:', err);
+      Alert.alert('Error', 'Something went wrong');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(true);
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    setLoading(false);
-
-    if (error) {
-      console.log('Login error:', error.message);
-      return;
-    }
-
-    console.log('Logged in user:', data.user);
-
-    router.replace('/home');
   };
 
   return (
@@ -135,11 +143,10 @@ export default function LoginScreen() {
                 secureTextEntry={!showPassword}
                 value={password}
                 onChangeText={setPassword}
+                autoCapitalize="none"
               />
 
-              <TouchableOpacity
-                onPress={() => setShowPassword(!showPassword)}
-              >
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 <Feather
                   name={showPassword ? 'eye' : 'eye-off'}
                   size={20}
@@ -150,9 +157,7 @@ export default function LoginScreen() {
 
             {/* FORGOT */}
             <TouchableOpacity style={styles.forgotPasswordBtn}>
-              <Text style={styles.forgotPasswordText}>
-                Forgot Password?
-              </Text>
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 
             {/* LOGIN BUTTON */}
@@ -160,6 +165,7 @@ export default function LoginScreen() {
               style={styles.loginBtn}
               onPress={handleLogin}
               activeOpacity={0.8}
+              disabled={loading}
             >
               <Text style={styles.loginBtnText}>
                 {loading ? 'Logging in...' : 'Log In'}
@@ -203,6 +209,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   headerContainer: {
     marginBottom: 40,
