@@ -1,6 +1,6 @@
 <?php
 $SUPABASE_URL = "https://okwnknzodfvbsbgetvzh.supabase.co";
-$SUPABASE_KEY = "sb_publishable_isCj681TK4luzYBQWSNJUg_qhCavuBs";
+$SUPABASE_KEY = "sb_publishable_isCj681TK4luzYBQWSNJUg_qhCavuBs"; 
 ?>
 
 <!DOCTYPE html>
@@ -172,9 +172,7 @@ $SUPABASE_KEY = "sb_publishable_isCj681TK4luzYBQWSNJUg_qhCavuBs";
     <script type="module">
         import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
 
-        /* =========================
-           SUPABASE CONNECTION
-        ========================= */
+        /* SUPABASE CONNECTION */
         const supabase = createClient(
             "https://okwnknzodfvbsbgetvzh.supabase.co",
             "sb_publishable_isCj681TK4luzYBQWSNJUg_qhCavuBs"
