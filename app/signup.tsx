@@ -15,7 +15,6 @@ import {
   View
 } from 'react-native';
 
-// Import your Supabase client (make sure this path matches your project)
 import { supabase } from '../src/services/supabase';
 
 const COLORS = {
@@ -36,9 +35,8 @@ export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false); // Added for loading state
+  const [loading, setLoading] = useState(false); 
 
-  // Entrance Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
 
@@ -50,7 +48,6 @@ export default function SignUpScreen() {
   }, []);
 
   const handleSignUp = async () => {
-    // Prevent empty submissions
     if (!email || !password) {
       Alert.alert('Hold on!', 'Please enter an email and password.');
       return;
@@ -63,7 +60,7 @@ export default function SignUpScreen() {
       password: password,
       options: {
         data: {
-          full_name: name, // Saves the user's name in Supabase Auth!
+          full_name: name, 
         }
       }
     });
@@ -74,10 +71,10 @@ export default function SignUpScreen() {
       Alert.alert('Error', error.message);
     } else {
       Alert.alert('Success!', 'Check your email for the confirmation link.');
-      // If email confirmation is disabled in Supabase, you can immediately route to home:
+      // pag nakadisable email confirmation sa supabase
       router.replace('/home'); 
       
-      // If email confirmation IS required, navigate them back to log in:
+      // pag naman bubuksan na sha
       // router.back();
     }
   };
@@ -96,7 +93,7 @@ export default function SignUpScreen() {
             { opacity: fadeAnim, transform: [{ translateY: slideUpAnim }] }
           ]}
         >
-          {/* --- Top Bar / Back Button --- */}
+          {/* Top Bar / Back Button */}
           <View style={styles.topBar}>
             <TouchableOpacity 
               style={styles.backBtn} 
@@ -106,13 +103,13 @@ export default function SignUpScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* --- Header Texts --- */}
+          {/* Header Texts */}
           <View style={styles.headerContainer}>
             <Text style={styles.titleText}>Create Account ✨</Text>
             <Text style={styles.subText}>Sign up to get real-time disaster alerts and stay protected.</Text>
           </View>
 
-          {/* --- Form Inputs --- */}
+          {/* Form Inputs */}
           <View style={styles.formContainer}>
             
             {/* Full Name Input */}
@@ -170,7 +167,7 @@ export default function SignUpScreen() {
               style={[styles.signUpBtn, loading && { opacity: 0.7 }]} 
               onPress={handleSignUp}
               activeOpacity={0.8}
-              disabled={loading} // Disables button while loading
+              disabled={loading} 
             >
               <Text style={styles.signUpBtnText}>
                 {loading ? 'Signing Up...' : 'Sign Up'}
@@ -178,7 +175,7 @@ export default function SignUpScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* --- Footer Log In --- */}
+          {/* Footer Log In */}
           <View style={styles.footerContainer}>
             <Text style={styles.footerText}>Already have an account? </Text>
             <TouchableOpacity onPress={() => router.back()}>
