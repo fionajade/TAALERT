@@ -1,6 +1,7 @@
+import 'react-native-url-polyfill/auto'; // <-- CRITICAL: Prevents Supabase from hanging forever!
+
 import { Feather } from '@expo/vector-icons';
-import { decode } from 'base64-arraybuffer'; // <-- IMPORT DECODE
-import * as ImagePicker from 'expo-image-picker'; // <-- IMPORT IMAGE PICKER
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -18,23 +19,20 @@ import {
 
 import BottomNavbar from '../components/BottomNavbar';
 import { ReportStyles as styles } from '../constants/theme';
-import { supabase } from '../src/services/supabase'; // Make sure this path is correct!
+import { supabase } from '../src/services/supabase';
 
 const REPORT_TYPES = ['Ashfall', 'Tremor', 'Smoke', 'Injury', 'Other'];
 
 export default function ReportScreen() {
     const router = useRouter();
     
-    // --- 1. STATES ---
     const [selectedType, setSelectedType] = useState('Ashfall');
     const [location, setLocation] = useState('');
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
     
-    // State to hold the image selected from the phone
-    const [image, setImage] = useState<{ uri: string; base64: string; ext: string } | null>(null);
+    const [image, setImage] = useState<{ uri: string; ext: string } | null>(null);
 
-    // Animations
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideUpAnim = useRef(new Animated.Value(30)).current;
 
@@ -45,7 +43,6 @@ export default function ReportScreen() {
         ]).start();
     }, []);
 
-    // --- 2. OPEN GALLERY FUNCTION ---
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
@@ -57,24 +54,20 @@ export default function ReportScreen() {
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 0.5, // Compresses image to make upload faster
-            base64: true, // We need this to upload to Supabase
+            quality: 0.2, 
         });
 
-        if (!result.canceled && result.assets[0].base64) {
+        if (!result.canceled) {
             const uri = result.assets[0].uri;
             const ext = uri.split('.').pop()?.toLowerCase() || 'jpeg'; 
             
             setImage({
                 uri: uri,
-                base64: result.assets[0].base64,
                 ext: ext === 'jpg' ? 'jpeg' : ext, 
             });
         }
     };
 
-    // --- 3. SUBMIT EVERYTHING FUNCTION ---
-// --- 3. SUBMIT EVERYTHING FUNCTION ---
     const handleSubmit = async () => {
         if (!location.trim() || !description.trim()) {
             Alert.alert("Missing Information", "Please fill in both the location and description.");
@@ -86,34 +79,36 @@ export default function ReportScreen() {
         try {
             let photoUrl = null;
 
-            // STEP A: If they picked an image, upload it to Storage first
             if (image) {
-                console.log("1. Starting image upload to Supabase...");
                 const fileName = `${Date.now()}.${image.ext}`; 
                 
-                const { data: uploadData, error: uploadError } = await supabase
+                // Fetch file data natively and convert to Blob (This replaces the base64 code)
+                const response = await fetch(image.uri);
+                const blob = await response.blob();
+
+                const { error: uploadError } = await supabase
                     .storage
                     .from('report-images')
-                    .upload(fileName, decode(image.base64), {
+                    .upload(fileName, blob, {
                         contentType: `image/${image.ext}`,
+                        upsert: true,
                     });
 
                 if (uploadError) {
-                    console.error("SUPABASE UPLOAD ERROR:", uploadError);
-                    throw new Error("Failed to upload image: " + uploadError.message);
+                    Alert.alert("Storage Error!", uploadError.message);
+                    setLoading(false);
+                    return; 
                 }
-
-                console.log("2. Image uploaded successfully! Getting public URL...");
+                
                 const { data: publicUrlData } = supabase
                     .storage
                     .from('report-images')
                     .getPublicUrl(fileName);
                 
                 photoUrl = publicUrlData.publicUrl; 
-                console.log("3. Image URL generated:", photoUrl);
             }
-
-            console.log("4. Saving report to the Database...");
+            
+            // Insert into Database
             const { error: dbError } = await supabase
                 .from('reports')
                 .insert([
@@ -126,20 +121,19 @@ export default function ReportScreen() {
                 ]);
 
             if (dbError) {
-                console.error("DATABASE ERROR:", dbError);
-                throw new Error("Failed to save report: " + dbError.message);
+                Alert.alert("Database Error!", dbError.message);
+                setLoading(false);
+                return;
             }
 
-            console.log("5. Success! Report submitted.");
-            Alert.alert("Success!", "Your report has been submitted.");
+            Alert.alert("SUCCESS!", "Your report and photo have been fully submitted.");
             setLocation('');
             setDescription('');
             setImage(null);
             router.replace('/home'); 
 
         } catch (error: any) {
-            console.error("CATCH BLOCK ERROR:", error);
-            Alert.alert("Error", error.message);
+            Alert.alert("System Error", error.message || "An unexpected error occurred.");
         } finally {
             setLoading(false);
         }
@@ -157,7 +151,6 @@ export default function ReportScreen() {
             <Animated.View style={{ flex: 1, opacity: fadeAnim, transform: [{ translateY: slideUpAnim }] }}>
                 <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
-                    {/* Type Selection */}
                     <Text style={styles.label}>TYPE</Text>
                     <View style={styles.typeGrid}>
                         {REPORT_TYPES.map((type) => (
@@ -173,7 +166,6 @@ export default function ReportScreen() {
                         ))}
                     </View>
 
-                    {/* Location Input */}
                     <Text style={styles.label}>LOCATION</Text>
                     <View style={styles.inputContainer}>
                         <Feather name="map-pin" size={18} color="#25A5FE" style={styles.inputIcon} />
@@ -186,7 +178,6 @@ export default function ReportScreen() {
                         />
                     </View>
 
-                    {/* Description Input */}
                     <Text style={styles.label}>DESCRIPTION</Text>
                     <View style={styles.textAreaContainer}>
                         <TextInput
@@ -201,14 +192,12 @@ export default function ReportScreen() {
                         />
                     </View>
 
-                    {/* Photo Upload Button */}
                     <Text style={styles.label}>PHOTO</Text>
                     <TouchableOpacity 
                         style={[styles.photoBox, image && { padding: 0, overflow: 'hidden' }]} 
-                        onPress={pickImage} // <-- Triggers gallery
+                        onPress={pickImage} 
                     >
                         {image ? (
-                            // Show selected image preview
                             <>
                                 <Image source={{ uri: image.uri }} style={{ width: '100%', height: 150 }} />
                                 <View style={{ position: 'absolute', backgroundColor: 'rgba(0,0,0,0.5)', padding: 8, borderRadius: 20 }}>
@@ -216,7 +205,6 @@ export default function ReportScreen() {
                                 </View>
                             </>
                         ) : (
-                            // Default upload UI
                             <>
                                 <Feather name="camera" size={32} color="#25A5FE" />
                                 <Text style={styles.photoText}>Take photo or upload</Text>
@@ -228,7 +216,6 @@ export default function ReportScreen() {
                 </ScrollView>
             </Animated.View>
 
-            {/* Submit Button */}
             <View style={styles.footer}>
                 <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={loading}>
                     {loading ? (
