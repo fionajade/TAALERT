@@ -105,7 +105,7 @@ try {
     <main class="main-content">
         <!-- Top Navigation Area -->
         <header class="top-bar">
-            <h1 class="top-title">TAALERT</h1>
+            <h1 class="top-title">TaliResQ</h1>
             <div class="top-icons">
                 <i class="bi bi-bell"></i>
                 <i class="bi bi-person"></i>
