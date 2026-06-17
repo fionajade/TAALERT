@@ -49,7 +49,7 @@ try {
     FROM reports
     ORDER BY created_at DESC
     LIMIT 10
-");
+    ");
 
     $reports = $stmt->fetchAll();
 
@@ -61,7 +61,7 @@ try {
     FROM reports
     GROUP BY type
     ORDER BY total DESC
-");
+    ");
 
     $incidentTypes = $stmt->fetchAll();
 
@@ -73,7 +73,7 @@ try {
     FROM reports
     GROUP BY DATE(created_at)
     ORDER BY report_date ASC
-");
+    ");
 
     $reportsOverTime = $stmt->fetchAll();
 
@@ -159,43 +159,32 @@ try {
                                     </tr>
                                 </thead>
                                 <tbody id="incidentTableBody">
-
                                     <?php if ($error_message): ?>
-
                                         <tr>
                                             <td colspan="5">
                                                 Database Error:
                                                 <?php echo htmlspecialchars($error_message); ?>
                                             </td>
                                         </tr>
-
                                     <?php elseif (count($reports) === 0): ?>
-
                                         <tr>
                                             <td colspan="5" class="no-data-msg">
                                                 No reports found.
                                             </td>
                                         </tr>
-
                                     <?php else: ?>
-
                                         <?php foreach ($reports as $report): ?>
-
                                             <tr>
                                                 <td><?php echo htmlspecialchars($report['id']); ?></td>
-
                                                 <td>
                                                     <?php echo htmlspecialchars($report['type']); ?>
                                                 </td>
-
                                                 <td>
                                                     <?php echo htmlspecialchars($report['location']); ?>
                                                 </td>
-
                                                 <td>
                                                     Reported
                                                 </td>
-
                                                 <td>
                                                     <?php echo date(
                                                         'M d, Y',
@@ -203,24 +192,19 @@ try {
                                                     ); ?>
                                                 </td>
                                             </tr>
-
                                         <?php endforeach; ?>
-
                                     <?php endif; ?>
-
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-
                 <div class="dash-card span-3">
                     <h3 class="card-title mb-2">INCIDENT BY TYPE</h3>
                     <div class="chart-container">
                         <canvas id="donutChart"></canvas>
                     </div>
                     <div class="donut-legend">
-
                         <?php
                         $colors = [
                             '#d9534f',
@@ -232,22 +216,17 @@ try {
                             '#20B2AA',
                             '#708090'
                         ];
-
                         foreach ($incidentTypes as $index => $item):
                             ?>
-
                             <div class="legend-item">
                                 <div class="dot" style="background-color: <?php echo $colors[$index % count($colors)]; ?>">
                                 </div>
                                 <?php echo htmlspecialchars($item['type']); ?>
                                 (<?php echo $item['total']; ?>)
                             </div>
-
                         <?php endforeach; ?>
-
                     </div>
                 </div>
-
                 <div class="dash-card span-3">
                     <h3 class="card-title mb-3">CREATE NEW ALERT</h3>
 
@@ -321,13 +300,9 @@ try {
         Chart.defaults.color = '#ffffff';
         Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
 
-        // ----------------------------
         // Donut Chart
-        // ----------------------------
-
         const labels = incidentData.map(item => item.type);
         const values = incidentData.map(item => Number(item.total));
-
         const chartColors = [
             '#d9534f',
             '#f0ad4e',
@@ -338,16 +313,13 @@ try {
             '#20B2AA',
             '#708090'
         ];
-
         const total = values.reduce((a, b) => a + b, 0);
-
         const ctxDonut = document
             .getElementById("donutChart")
             .getContext("2d");
 
         new Chart(ctxDonut, {
             type: "doughnut",
-
             data: {
                 labels: labels,
                 datasets: [{
@@ -356,7 +328,6 @@ try {
                     borderWidth: 0
                 }]
             },
-
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -367,37 +338,23 @@ try {
                     }
                 }
             },
-
             plugins: [{
-
                 id: "textCenter",
-
                 beforeDraw(chart) {
-
                     const { ctx, width, height } = chart;
-
                     ctx.save();
-
                     ctx.fillStyle = "#fff";
                     ctx.textAlign = "center";
-
                     ctx.font = "bold 34px Arial";
                     ctx.fillText(total, width / 2, height / 2);
-
                     ctx.font = "13px Arial";
                     ctx.fillText("TOTAL", width / 2, height / 2 + 20);
-
                     ctx.restore();
-
                 }
 
             }]
         });
-
-        // ----------------------------
         // Reports Over Time
-        // ----------------------------
-
         const lineLabels = reportsOverTime.map(item => {
             const d = new Date(item.report_date);
             return d.toLocaleDateString('en-US', {
@@ -405,90 +362,54 @@ try {
                 day: 'numeric'
             });
         });
-
         const lineValues = reportsOverTime.map(item => Number(item.total));
-
         const ctxLine = document
             .getElementById('lineChart')
             .getContext('2d');
-
         new Chart(ctxLine, {
-
             type: 'line',
-
             data: {
-
                 labels: lineLabels,
-
                 datasets: [{
-
                     label: 'Reports',
-
                     data: lineValues,
-
                     borderColor: '#ffffff',
-
                     backgroundColor: 'rgba(255,255,255,.15)',
-
                     fill: true,
-
                     borderWidth: 2,
-
                     tension: .35,
-
                     pointRadius: 4,
-
                     pointBackgroundColor: '#ffffff'
-
                 }]
             },
-
             options: {
-
                 responsive: true,
-
                 maintainAspectRatio: false,
-
                 plugins: {
-
                     legend: {
                         display: false
                     }
-
                 },
-
                 scales: {
-
                     y: {
-
                         beginAtZero: true,
-
                         ticks: {
                             color: '#fff'
                         },
-
                         grid: {
                             color: 'rgba(255,255,255,.08)'
                         }
-
                     },
-
                     x: {
-
                         ticks: {
                             color: '#fff'
                         },
-
                         grid: {
                             display: false
                         }
-
                     }
-
                 }
-
             }
-
         });
 
         // Sidebar logic
@@ -501,21 +422,17 @@ try {
         });
 
         // Map Integration (Leaflet.js)
-
         const monitoringMap = L.map('monitoringMap').setView([14.0940, 121.0197], 13);
-
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap'
         }).addTo(monitoringMap);
-
         const colors = {
             critical: '#c92a2a',
             ongoing: '#f5b041',
             reported: '#3498db',
             resolved: '#2ecc71'
         };
-
         function createMarker(lat, lng, colorCode, popupText) {
             L.circleMarker([lat, lng], {
                 radius: 8,
