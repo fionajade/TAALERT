@@ -65,6 +65,18 @@ try {
 
     $incidentTypes = $stmt->fetchAll();
 
+    // Reports over time (last 7 days)
+    $stmt = $pdo->query("
+    SELECT
+        DATE(created_at) AS report_date,
+        COUNT(*) AS total
+    FROM reports
+    GROUP BY DATE(created_at)
+    ORDER BY report_date ASC
+");
+
+    $reportsOverTime = $stmt->fetchAll();
+
 } catch (PDOException $e) {
     $error_message = $e->getMessage();
 }
@@ -303,118 +315,180 @@ try {
         const incidentData = <?php echo json_encode($incidentTypes); ?>;
     </script>
     <script>
+        const reportsOverTime = <?php echo json_encode($reportsOverTime); ?>;
+    </script>
+    <script>
         Chart.defaults.color = '#ffffff';
         Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
 
-// ----------------------------
-// Donut Chart
-// ----------------------------
+        // ----------------------------
+        // Donut Chart
+        // ----------------------------
 
-const labels = incidentData.map(item => item.type);
-const values = incidentData.map(item => Number(item.total));
+        const labels = incidentData.map(item => item.type);
+        const values = incidentData.map(item => Number(item.total));
 
-const chartColors = [
-    '#d9534f',
-    '#f0ad4e',
-    '#5cb85c',
-    '#5bc0de',
-    '#9370DB',
-    '#FF7F50',
-    '#20B2AA',
-    '#708090'
-];
+        const chartColors = [
+            '#d9534f',
+            '#f0ad4e',
+            '#5cb85c',
+            '#5bc0de',
+            '#9370DB',
+            '#FF7F50',
+            '#20B2AA',
+            '#708090'
+        ];
 
-const total = values.reduce((a,b)=>a+b,0);
+        const total = values.reduce((a, b) => a + b, 0);
 
-const ctxDonut = document
-.getElementById("donutChart")
-.getContext("2d");
+        const ctxDonut = document
+            .getElementById("donutChart")
+            .getContext("2d");
 
-new Chart(ctxDonut,{
-    type:"doughnut",
+        new Chart(ctxDonut, {
+            type: "doughnut",
 
-    data:{
-        labels:labels,
-        datasets:[{
-            data:values,
-            backgroundColor:chartColors.slice(0,labels.length),
-            borderWidth:0
-        }]
-    },
-
-    options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        cutout:"75%",
-        plugins:{
-            legend:{
-                display:false
-            }
-        }
-    },
-
-    plugins:[{
-
-        id:"textCenter",
-
-        beforeDraw(chart){
-
-            const {ctx,width,height}=chart;
-
-            ctx.save();
-
-            ctx.fillStyle="#fff";
-            ctx.textAlign="center";
-
-            ctx.font="bold 34px Arial";
-            ctx.fillText(total,width/2,height/2);
-
-            ctx.font="13px Arial";
-            ctx.fillText("TOTAL",width/2,height/2+20);
-
-            ctx.restore();
-
-        }
-
-    }]
-});
-
-        // Line Chart
-        const ctxLine = document.getElementById('lineChart').getContext('2d');
-        new Chart(ctxLine, {
-            type: 'line',
             data: {
-                labels: ['May 4', 'May 5', 'May 6', 'May 7', 'May 8', 'May 9', 'May 10'],
+                labels: labels,
                 datasets: [{
-                    label: 'Reports',
-                    data: [0, 0, 0, 0, 0, 0, 0],
-                    borderColor: '#ffffff',
-                    borderWidth: 1,
-                    pointBackgroundColor: '#ffffff',
-                    pointRadius: 0,
-                    tension: 0.4
+                    data: values,
+                    backgroundColor: chartColors.slice(0, labels.length),
+                    borderWidth: 0
                 }]
             },
+
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                layout: { padding: { left: 5, right: 15, top: 10, bottom: 5 } },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 20,
-                        grid: { color: 'rgba(255,255,255,0.1)', drawBorder: false },
-                        border: { display: false },
-                        ticks: { font: { size: 10 }, padding: 8, maxTicksLimit: 5 }
-                    },
-                    x: {
-                        grid: { display: false, drawBorder: false },
-                        border: { display: true, color: 'rgba(255,255,255,0.3)' },
-                        ticks: { display: false }
+                cutout: "75%",
+                plugins: {
+                    legend: {
+                        display: false
                     }
                 }
+            },
+
+            plugins: [{
+
+                id: "textCenter",
+
+                beforeDraw(chart) {
+
+                    const { ctx, width, height } = chart;
+
+                    ctx.save();
+
+                    ctx.fillStyle = "#fff";
+                    ctx.textAlign = "center";
+
+                    ctx.font = "bold 34px Arial";
+                    ctx.fillText(total, width / 2, height / 2);
+
+                    ctx.font = "13px Arial";
+                    ctx.fillText("TOTAL", width / 2, height / 2 + 20);
+
+                    ctx.restore();
+
+                }
+
+            }]
+        });
+
+        // ----------------------------
+        // Reports Over Time
+        // ----------------------------
+
+        const lineLabels = reportsOverTime.map(item => {
+            const d = new Date(item.report_date);
+            return d.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
+            });
+        });
+
+        const lineValues = reportsOverTime.map(item => Number(item.total));
+
+        const ctxLine = document
+            .getElementById('lineChart')
+            .getContext('2d');
+
+        new Chart(ctxLine, {
+
+            type: 'line',
+
+            data: {
+
+                labels: lineLabels,
+
+                datasets: [{
+
+                    label: 'Reports',
+
+                    data: lineValues,
+
+                    borderColor: '#ffffff',
+
+                    backgroundColor: 'rgba(255,255,255,.15)',
+
+                    fill: true,
+
+                    borderWidth: 2,
+
+                    tension: .35,
+
+                    pointRadius: 4,
+
+                    pointBackgroundColor: '#ffffff'
+
+                }]
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+                        display: false
+                    }
+
+                },
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        ticks: {
+                            color: '#fff'
+                        },
+
+                        grid: {
+                            color: 'rgba(255,255,255,.08)'
+                        }
+
+                    },
+
+                    x: {
+
+                        ticks: {
+                            color: '#fff'
+                        },
+
+                        grid: {
+                            display: false
+                        }
+
+                    }
+
+                }
+
             }
+
         });
 
         // Sidebar logic
