@@ -1,6 +1,65 @@
 <?php
-$SUPABASE_URL = "https://okwnknzodfvbsbgetvzh.supabase.co";
-$SUPABASE_KEY = "sb_publishable_isCj681TK4luzYBQWSNJUg_qhCavuBs"; 
+// ==========================================
+// SUPABASE POSTGRES CONNECTION
+// ==========================================
+
+$host = 'aws-1-ap-northeast-1.pooler.supabase.com';
+$port = '6543';
+$dbname = 'postgres';
+$user = 'postgres.okwnknzodfvbsbgetvzh';
+$password = 'taliresq67_';
+
+$dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
+
+$reports = [];
+$totalReports = 0;
+$totalUsers = 0;
+$error_message = null;
+
+try {
+
+    $pdo = new PDO(
+        $dsn,
+        $user,
+        $password,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]
+    );
+
+    // Total registered users
+    $stmt = $pdo->query("
+        SELECT public.get_registered_users() AS total
+    ");
+    $totalUsers = $stmt->fetch()['total'];
+
+    // Total reports
+    $stmt = $pdo->query("
+        SELECT COUNT(*) AS total
+        FROM reports
+    ");
+    $totalReports = $stmt->fetch()['total'];
+
+    // Recent reports
+    $stmt = $pdo->query("
+        SELECT
+            id,
+            created_at,
+            type,
+            location,
+            description,
+            photo_url
+        FROM reports
+        ORDER BY created_at DESC
+        LIMIT 10
+    ");
+
+    $reports = $stmt->fetchAll();
+
+} catch (PDOException $e) {
+    $error_message = $e->getMessage();
+}
 ?>
 
 <!DOCTYPE html>
@@ -20,7 +79,7 @@ $SUPABASE_KEY = "sb_publishable_isCj681TK4luzYBQWSNJUg_qhCavuBs";
 </head>
 
 <body>
-
+    <?php include 'sidebar.php'; ?>
 
     <!-- Main Content -->
     <main class="main-content">
@@ -39,11 +98,12 @@ $SUPABASE_KEY = "sb_publishable_isCj681TK4luzYBQWSNJUg_qhCavuBs";
 
             <!-- MASTER CSS GRID -->
             <div class="master-grid">
-
                 <!-- ROW 1 (Stats) -->
                 <div class="dash-card stat-card span-3">
                     <h3 class="card-title">TOTAL REPORTS</h3>
-                    <p class="stat-number">0</p>
+                    <p class="stat-number">
+                        <?php echo $totalReports; ?>
+                    </p>
                 </div>
                 <div class="dash-card stat-card span-3">
                     <h3 class="card-title">ACTIVE INCIDENTS</h3>
@@ -51,7 +111,9 @@ $SUPABASE_KEY = "sb_publishable_isCj681TK4luzYBQWSNJUg_qhCavuBs";
                 </div>
                 <div class="dash-card stat-card span-3">
                     <h3 class="card-title">REGISTERED USERS</h3>
-                    <p class="stat-number">0</p>
+                    <p class="stat-number">
+                        <?php echo $totalUsers; ?>
+                    </p>
                 </div>
                 <div class="dash-card stat-card span-3">
                     <h3 class="card-title">ALERTS SENT TODAY</h3>
@@ -77,9 +139,55 @@ $SUPABASE_KEY = "sb_publishable_isCj681TK4luzYBQWSNJUg_qhCavuBs";
                                     </tr>
                                 </thead>
                                 <tbody id="incidentTableBody">
-                                    <tr>
-                                        <td colspan="5" class="no-data-msg">No recent incidents reported.</td>
-                                    </tr>
+
+                                    <?php if ($error_message): ?>
+
+                                        <tr>
+                                            <td colspan="5">
+                                                Database Error:
+                                                <?php echo htmlspecialchars($error_message); ?>
+                                            </td>
+                                        </tr>
+
+                                    <?php elseif (count($reports) === 0): ?>
+
+                                        <tr>
+                                            <td colspan="5" class="no-data-msg">
+                                                No reports found.
+                                            </td>
+                                        </tr>
+
+                                    <?php else: ?>
+
+                                        <?php foreach ($reports as $report): ?>
+
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($report['id']); ?></td>
+
+                                                <td>
+                                                    <?php echo htmlspecialchars($report['type']); ?>
+                                                </td>
+
+                                                <td>
+                                                    <?php echo htmlspecialchars($report['location']); ?>
+                                                </td>
+
+                                                <td>
+                                                    Reported
+                                                </td>
+
+                                                <td>
+                                                    <?php echo date(
+                                                        'M d, Y',
+                                                        strtotime($report['created_at'])
+                                                    ); ?>
+                                                </td>
+                                            </tr>
+
+                                        <?php endforeach; ?>
+
+                                    <?php endif; ?>
+
                                 </tbody>
                             </table>
                         </div>
@@ -169,153 +277,132 @@ $SUPABASE_KEY = "sb_publishable_isCj681TK4luzYBQWSNJUg_qhCavuBs";
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Chart JS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script type="module">
-        import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
-
-        /* SUPABASE CONNECTION */
-        const supabase = createClient(
-            "https://okwnknzodfvbsbgetvzh.supabase.co",
-            "sb_publishable_isCj681TK4luzYBQWSNJUg_qhCavuBs"
-        )
-
-async function testUsers() {
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-
-  console.log("USERS DATA:", data)
-  console.log("ERROR:", error)
-}
-document.addEventListener("DOMContentLoaded", () => {
-   testUsers()
-})
-    </script>
     <script>
-            Chart.defaults.color = '#ffffff';
-            Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+        Chart.defaults.color = '#ffffff';
+        Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
 
-            // Donut Chart
-            const ctxDonut = document.getElementById('donutChart').getContext('2d');
-            new Chart(ctxDonut, {
-                type: 'doughnut',
-                data: {
-                    labels: ['No Data'],
-                    datasets: [{
-                        data: [100],
-                        backgroundColor: ['#3a5082'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '75%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { enabled: false }
-                    }
-                },
-                plugins: [{
-                    id: 'textCenter',
-                    beforeDraw: function (chart) {
-                        var width = chart.width, height = chart.height, ctx = chart.ctx;
-                        ctx.restore();
-
-                        ctx.font = "bold 2.2rem 'Retro Floral', 'Impact', sans-serif";
-                        ctx.textBaseline = "middle";
-                        ctx.fillStyle = "#ffffff";
-                        var text = "0", textX = Math.round((width - ctx.measureText(text).width) / 2), textY = height / 2 - 8;
-                        ctx.fillText(text, textX, textY);
-
-                        ctx.font = "normal 0.75rem sans-serif";
-                        var text2 = "TOTAL", text2X = Math.round((width - ctx.measureText(text2).width) / 2), text2Y = height / 2 + 16;
-                        ctx.fillText(text2, text2X, text2Y);
-                        ctx.save();
-                    }
+        // Donut Chart
+        const ctxDonut = document.getElementById('donutChart').getContext('2d');
+        new Chart(ctxDonut, {
+            type: 'doughnut',
+            data: {
+                labels: ['No Data'],
+                datasets: [{
+                    data: [100],
+                    backgroundColor: ['#3a5082'],
+                    borderWidth: 0
                 }]
-            });
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                }
+            },
+            plugins: [{
+                id: 'textCenter',
+                beforeDraw: function (chart) {
+                    var width = chart.width, height = chart.height, ctx = chart.ctx;
+                    ctx.restore();
 
-            // Line Chart
-            const ctxLine = document.getElementById('lineChart').getContext('2d');
-            new Chart(ctxLine, {
-                type: 'line',
-                data: {
-                    labels: ['May 4', 'May 5', 'May 6', 'May 7', 'May 8', 'May 9', 'May 10'],
-                    datasets: [{
-                        label: 'Reports',
-                        data: [0, 0, 0, 0, 0, 0, 0],
-                        borderColor: '#ffffff',
-                        borderWidth: 1,
-                        pointBackgroundColor: '#ffffff',
-                        pointRadius: 0,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                    layout: { padding: { left: 5, right: 15, top: 10, bottom: 5 } },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 20,
-                            grid: { color: 'rgba(255,255,255,0.1)', drawBorder: false },
-                            border: { display: false },
-                            ticks: { font: { size: 10 }, padding: 8, maxTicksLimit: 5 }
-                        },
-                        x: {
-                            grid: { display: false, drawBorder: false },
-                            border: { display: true, color: 'rgba(255,255,255,0.3)' },
-                            ticks: { display: false }
-                        }
+                    ctx.font = "bold 2.2rem 'Retro Floral', 'Impact', sans-serif";
+                    ctx.textBaseline = "middle";
+                    ctx.fillStyle = "#ffffff";
+                    var text = "0", textX = Math.round((width - ctx.measureText(text).width) / 2), textY = height / 2 - 8;
+                    ctx.fillText(text, textX, textY);
+
+                    ctx.font = "normal 0.75rem sans-serif";
+                    var text2 = "TOTAL", text2X = Math.round((width - ctx.measureText(text2).width) / 2), text2Y = height / 2 + 16;
+                    ctx.fillText(text2, text2X, text2Y);
+                    ctx.save();
+                }
+            }]
+        });
+
+        // Line Chart
+        const ctxLine = document.getElementById('lineChart').getContext('2d');
+        new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels: ['May 4', 'May 5', 'May 6', 'May 7', 'May 8', 'May 9', 'May 10'],
+                datasets: [{
+                    label: 'Reports',
+                    data: [0, 0, 0, 0, 0, 0, 0],
+                    borderColor: '#ffffff',
+                    borderWidth: 1,
+                    pointBackgroundColor: '#ffffff',
+                    pointRadius: 0,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                layout: { padding: { left: 5, right: 15, top: 10, bottom: 5 } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 20,
+                        grid: { color: 'rgba(255,255,255,0.1)', drawBorder: false },
+                        border: { display: false },
+                        ticks: { font: { size: 10 }, padding: 8, maxTicksLimit: 5 }
+                    },
+                    x: {
+                        grid: { display: false, drawBorder: false },
+                        border: { display: true, color: 'rgba(255,255,255,0.3)' },
+                        ticks: { display: false }
                     }
                 }
-            });
-
-            // Sidebar logic
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', function (e) {
-                    if (this.parentElement.classList.contains('bottom-nav')) return;
-                    document.querySelectorAll('.nav-menu .nav-item').forEach(nav => nav.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-
-            // Map Integration (Leaflet.js)
-
-            const monitoringMap = L.map('monitoringMap').setView([14.0940, 121.0197], 13);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
-            }).addTo(monitoringMap);
-
-            const colors = {
-                critical: '#c92a2a',
-                ongoing: '#f5b041',
-                reported: '#3498db',
-                resolved: '#2ecc71'
-            };
-
-            function createMarker(lat, lng, colorCode, popupText) {
-                L.circleMarker([lat, lng], {
-                    radius: 8,
-                    fillColor: colorCode,
-                    color: '#ffffff',
-                    weight: 2,
-                    fillOpacity: 1
-                }).addTo(monitoringMap).bindPopup(popupText);
             }
+        });
 
-            createMarker(14.0940, 121.0197, colors.critical, "<b>Talisay Center</b><br>Critical Volcanic Tremor");
-            createMarker(14.0850, 121.0300, colors.ongoing, "<b>Aya, Talisay</b><br>Road Blockage On-Going");
-            createMarker(14.1000, 121.0000, colors.reported, "<b>Banga, Talisay</b><br>Ashfall Reported");
-            createMarker(14.0900, 120.9800, colors.resolved, "<b>Sampaloc</b><br>Gas Emission Resolved");
+        // Sidebar logic
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function (e) {
+                if (this.parentElement.classList.contains('bottom-nav')) return;
+                document.querySelectorAll('.nav-menu .nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
 
-            setTimeout(() => {
-                monitoringMap.invalidateSize();
-            }, 100);
+        // Map Integration (Leaflet.js)
+
+        const monitoringMap = L.map('monitoringMap').setView([14.0940, 121.0197], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(monitoringMap);
+
+        const colors = {
+            critical: '#c92a2a',
+            ongoing: '#f5b041',
+            reported: '#3498db',
+            resolved: '#2ecc71'
+        };
+
+        function createMarker(lat, lng, colorCode, popupText) {
+            L.circleMarker([lat, lng], {
+                radius: 8,
+                fillColor: colorCode,
+                color: '#ffffff',
+                weight: 2,
+                fillOpacity: 1
+            }).addTo(monitoringMap).bindPopup(popupText);
+        }
+
+        createMarker(14.0940, 121.0197, colors.critical, "<b>Talisay Center</b><br>Critical Volcanic Tremor");
+        createMarker(14.0850, 121.0300, colors.ongoing, "<b>Aya, Talisay</b><br>Road Blockage On-Going");
+        createMarker(14.1000, 121.0000, colors.reported, "<b>Banga, Talisay</b><br>Ashfall Reported");
+        createMarker(14.0900, 120.9800, colors.resolved, "<b>Sampaloc</b><br>Gas Emission Resolved");
+
+        setTimeout(() => {
+            monitoringMap.invalidateSize();
+        }, 100);
     </script>
 </body>
 
