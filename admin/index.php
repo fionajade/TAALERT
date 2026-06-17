@@ -39,19 +39,31 @@ try {
 
     // Recent reports
     $stmt = $pdo->query("
-        SELECT
-            id,
-            created_at,
-            type,
-            location,
-            description,
-            photo_url
-        FROM reports
-        ORDER BY created_at DESC
-        LIMIT 10
-    ");
+    SELECT
+        id,
+        created_at,
+        type,
+        location,
+        description,
+        photo_url
+    FROM reports
+    ORDER BY created_at DESC
+    LIMIT 10
+");
 
     $reports = $stmt->fetchAll();
+
+    //Reports by type for the donut chart
+    $stmt = $pdo->query("
+    SELECT
+        type,
+        COUNT(*) AS total
+    FROM reports
+    GROUP BY type
+    ORDER BY total DESC
+");
+
+    $incidentTypes = $stmt->fetchAll();
 
 } catch (PDOException $e) {
     $error_message = $e->getMessage();
@@ -196,18 +208,31 @@ try {
                         <canvas id="donutChart"></canvas>
                     </div>
                     <div class="donut-legend">
-                        <div class="legend-item">
-                            <div class="dot" style="background-color: var(--accent-red);"></div> Volcanic Tremor
-                        </div>
-                        <div class="legend-item">
-                            <div class="dot" style="background-color: var(--accent-yellow);"></div> Ashfall
-                        </div>
-                        <div class="legend-item">
-                            <div class="dot" style="background-color: var(--accent-green);"></div> Gas Emission
-                        </div>
-                        <div class="legend-item">
-                            <div class="dot" style="background-color: var(--accent-blue);"></div> Road Blockage
-                        </div>
+
+                        <?php
+                        $colors = [
+                            '#d9534f',
+                            '#f0ad4e',
+                            '#5cb85c',
+                            '#5bc0de',
+                            '#9370DB',
+                            '#FF7F50',
+                            '#20B2AA',
+                            '#708090'
+                        ];
+
+                        foreach ($incidentTypes as $index => $item):
+                            ?>
+
+                            <div class="legend-item">
+                                <div class="dot" style="background-color: <?php echo $colors[$index % count($colors)]; ?>">
+                                </div>
+                                <?php echo htmlspecialchars($item['type']); ?>
+                                (<?php echo $item['total']; ?>)
+                            </div>
+
+                        <?php endforeach; ?>
+
                     </div>
                 </div>
 
@@ -269,54 +294,90 @@ try {
         </div>
     </main>
 
+
     <!-- Leaflet JS for the Map -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Chart JS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        const incidentData = <?php echo json_encode($incidentTypes); ?>;
+    </script>
+    <script>
         Chart.defaults.color = '#ffffff';
         Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
 
-        // Donut Chart
-        const ctxDonut = document.getElementById('donutChart').getContext('2d');
-        new Chart(ctxDonut, {
-            type: 'doughnut',
-            data: {
-                labels: ['No Data'],
-                datasets: [{
-                    data: [100],
-                    backgroundColor: ['#3a5082'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '75%',
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: false }
-                }
-            },
-            plugins: [{
-                id: 'textCenter',
-                beforeDraw: function (chart) {
-                    var width = chart.width, height = chart.height, ctx = chart.ctx;
-                    ctx.restore();
+// ----------------------------
+// Donut Chart
+// ----------------------------
 
-                    ctx.font = "bold 2.2rem 'Retro Floral', 'Impact', sans-serif";
-                    ctx.textBaseline = "middle";
-                    ctx.fillStyle = "#ffffff";
-                    var text = "0", textX = Math.round((width - ctx.measureText(text).width) / 2), textY = height / 2 - 8;
-                    ctx.fillText(text, textX, textY);
+const labels = incidentData.map(item => item.type);
+const values = incidentData.map(item => Number(item.total));
 
-                    ctx.font = "normal 0.75rem sans-serif";
-                    var text2 = "TOTAL", text2X = Math.round((width - ctx.measureText(text2).width) / 2), text2Y = height / 2 + 16;
-                    ctx.fillText(text2, text2X, text2Y);
-                    ctx.save();
-                }
-            }]
-        });
+const chartColors = [
+    '#d9534f',
+    '#f0ad4e',
+    '#5cb85c',
+    '#5bc0de',
+    '#9370DB',
+    '#FF7F50',
+    '#20B2AA',
+    '#708090'
+];
+
+const total = values.reduce((a,b)=>a+b,0);
+
+const ctxDonut = document
+.getElementById("donutChart")
+.getContext("2d");
+
+new Chart(ctxDonut,{
+    type:"doughnut",
+
+    data:{
+        labels:labels,
+        datasets:[{
+            data:values,
+            backgroundColor:chartColors.slice(0,labels.length),
+            borderWidth:0
+        }]
+    },
+
+    options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        cutout:"75%",
+        plugins:{
+            legend:{
+                display:false
+            }
+        }
+    },
+
+    plugins:[{
+
+        id:"textCenter",
+
+        beforeDraw(chart){
+
+            const {ctx,width,height}=chart;
+
+            ctx.save();
+
+            ctx.fillStyle="#fff";
+            ctx.textAlign="center";
+
+            ctx.font="bold 34px Arial";
+            ctx.fillText(total,width/2,height/2);
+
+            ctx.font="13px Arial";
+            ctx.fillText("TOTAL",width/2,height/2+20);
+
+            ctx.restore();
+
+        }
+
+    }]
+});
 
         // Line Chart
         const ctxLine = document.getElementById('lineChart').getContext('2d');
