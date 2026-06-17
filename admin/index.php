@@ -1,8 +1,4 @@
 <?php
-// ==========================================
-// SUPABASE POSTGRES CONNECTION
-// ==========================================
-
 $host = 'aws-1-ap-northeast-1.pooler.supabase.com';
 $port = '6543';
 $dbname = 'postgres';
