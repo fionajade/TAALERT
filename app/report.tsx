@@ -1,4 +1,4 @@
-import 'react-native-url-polyfill/auto'; // <-- CRITICAL: Prevents Supabase from hanging forever!
+import 'react-native-url-polyfill/auto';
 
 import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -81,11 +81,8 @@ export default function ReportScreen() {
 
             if (image) {
                 const fileName = `${Date.now()}.${image.ext}`; 
-                
-                // Fetch file data natively and convert to Blob (This replaces the base64 code)
                 const response = await fetch(image.uri);
                 const blob = await response.blob();
-
                 const { error: uploadError } = await supabase
                     .storage
                     .from('report-images')
@@ -108,7 +105,6 @@ export default function ReportScreen() {
                 photoUrl = publicUrlData.publicUrl; 
             }
             
-            // Insert into Database
             const { error: dbError } = await supabase
                 .from('reports')
                 .insert([
