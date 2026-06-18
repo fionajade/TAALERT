@@ -1,13 +1,14 @@
+import { supabase } from '@/src/services/supabase';
 import { Feather } from '@expo/vector-icons';
-import React, { useEffect, useRef } from 'react'; // Added useEffect and useRef
+import React, { useEffect, useRef, useState } from 'react'; // Added useEffect and useRef
 import {
-    Animated,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View
+  Animated,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import BottomNavbar from '../components/BottomNavbar';
 import { COLORS, IndexStyles as styles } from '../constants/theme';
@@ -21,12 +22,33 @@ const RECENT_ACTIVITY_DATA = [
 export default function DisasterAppUI() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
+  const [userName, setUserName] = useState('User'); 
 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
       Animated.spring(slideUpAnim, { toValue: 0, friction: 6, useNativeDriver: true }),
     ]).start();
+
+  const getUser = async () => {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) return;
+
+    console.log(user); 
+
+    setUserName(
+      user.user_metadata?.full_name ||
+      user.user_metadata?.name ||
+      user.email?.split('@')[0] ||
+      'User'
+    );
+  };
+
+  getUser();
   }, []);
 
   return (
@@ -43,7 +65,7 @@ export default function DisasterAppUI() {
           <View style={styles.header}>
             <View>
               <Text style={styles.greetingText}>Hello,</Text>
-              <Text style={styles.nameText}>Marcus 👋</Text>
+              <Text style={styles.nameText}>{userName} 👋</Text>
             </View>
             <TouchableOpacity style={styles.notificationBtn}>
               <Feather name="bell" color={COLORS.primaryBlue} size={24} />

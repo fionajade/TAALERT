@@ -1,5 +1,6 @@
+import { supabase } from '@/src/services/supabase';
 import { Feather } from '@expo/vector-icons';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   SafeAreaView,
@@ -14,12 +15,33 @@ import { ProfileStyles as styles } from '../constants/theme';
 export default function ProfileScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
+  const [userName, setUserName] = useState('User');
 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
       Animated.spring(slideUpAnim, { toValue: 0, friction: 6, useNativeDriver: true }),
     ]).start();
+
+  const getUser = async () => {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) return;
+
+    console.log(user); // Check what fields are available
+
+    setUserName(
+      user.user_metadata?.full_name ||
+      user.user_metadata?.name ||
+      user.email?.split('@')[0] ||
+      'User'
+    );
+  };
+
+  getUser();
   }, []);
 
   return (
@@ -41,7 +63,7 @@ export default function ProfileScreen() {
               <Text style={styles.avatarText}>M</Text>
             </View>
             <View style={styles.profileInfo}>
-              <Text style={styles.userName}>Marcus</Text>
+              <Text style={styles.userName}>{userName}</Text>
               <View style={styles.locationRow}>
                 <Feather name="map-pin" size={14} color="#64748B" />
                 <Text style={styles.locationText}>Brgy. Banga, Talisay, Batangas</Text>
@@ -54,7 +76,7 @@ export default function ProfileScreen() {
 
           {/* Stats Row */}
           <View style={styles.statsRow}>
-            <StatCard value="12" label="REPORTS" />
+            <StatCard value="12" label="REPORTS" /> 
             <StatCard value="38" label="ALERTS" />
             <StatCard value="142" label="SAFE DAYS" />
           </View>
