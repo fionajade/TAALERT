@@ -1,6 +1,6 @@
 import { supabase } from '@/src/services/supabase';
 import { Feather } from '@expo/vector-icons';
-import React, { useEffect, useRef, useState } from 'react'; // Added useEffect and useRef
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   SafeAreaView,
