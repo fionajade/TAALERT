@@ -13,6 +13,7 @@ session_start();
     <!-- Leaflet CSS for the Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="icon" type="image/png" href="assets/log.png">
 </head>
 <?php include 'sidebar.php'; ?>
 

@@ -6,7 +6,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <div class="logo-container d-flex align-items-center justify-content-center gap-2">
         <img src="assets/logo1.png" alt="TAALERT Logo"
             style="height: 25px; width: auto; object-fit: contain;">
-        <h2 class="top-title">TaliResq</h2>
+        <h2 class="top-title">TaliResQ</h2>
     </div>
 
     <ul class="nav-menu">
@@ -15,13 +15,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <a href="index.php" class="nav-link">
                 <i class="bi bi-display"></i>
                 <span>Dashboard</span>
-            </a>
-        </li>
-
-        <li class="nav-item <?php echo ($current_page == 'incident.php') ? 'active' : ''; ?>">
-            <a href="incident.php" class="nav-link">
-                <i class="bi bi-file-earmark-text"></i>
-                <span>Report Incident</span>
             </a>
         </li>
 

@@ -1,0 +1,368 @@
+/* ===================================
+   ADD HOTLINE MODAL STYLE
+=================================== */
+
+
+/* Modal Container */
+#addHotlineModal .modal-dialog {
+    max-width: 450px;
+}
+
+
+/* Modal Box */
+#addHotlineModal .hotline-modal {
+    border-radius: 20px;
+    border: none;
+    padding: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+
+/* Header */
+#addHotlineModal .modal-header {
+    padding: 20px 25px 10px;
+}
+
+
+#addHotlineModal .modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #223868;
+}
+
+
+/* Body */
+#addHotlineModal .modal-body {
+    padding: 10px 25px;
+}
+
+
+/* Labels */
+#addHotlineModal label {
+
+    display: block;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    color: #777;
+
+    margin-bottom: 6px;
+
+    letter-spacing: .5px;
+
+}
+
+
+
+/* Inputs */
+#addHotlineModal .form-control {
+
+
+    height: 45px;
+
+    border-radius: 12px;
+
+    border: 1px solid #ddd;
+
+    font-size: 14px;
+
+    padding: 12px;
+
+    transition: .3s;
+
+}
+
+
+
+#addHotlineModal textarea.form-control {
+
+    height: auto;
+
+    resize: none;
+
+}
+
+
+
+#addHotlineModal .form-control:focus {
+
+
+    border-color: #223868;
+
+    box-shadow: 0 0 0 0.15rem rgba(34, 56, 104, .15);
+
+}
+
+
+
+
+/* Footer */
+
+#addHotlineModal .modal-footer {
+
+
+    padding: 15px 25px 20px;
+
+}
+
+
+
+/* Cancel Button */
+
+#addHotlineModal .cancel-btn {
+
+
+    background: #f1f1f1;
+
+    border: none;
+
+    border-radius: 10px;
+
+    padding: 10px 22px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+
+
+/* Save Button */
+
+#addHotlineModal .save-btn {
+
+
+    background: #223868;
+
+    color: white;
+
+    border: none;
+
+    border-radius: 10px;
+
+    padding: 10px 25px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+
+
+#addHotlineModal .save-btn:hover {
+
+
+    background: #17294d;
+
+}
+
+
+
+/* Close Button */
+
+#addHotlineModal .btn-close {
+
+
+    font-size: 12px;
+
+}
+
+
+
+.add-hotline-btn {
+
+
+    background: #000;
+
+    color: white;
+
+    border-radius: 30px;
+
+    padding: 10px 20px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+
+}
+
+
+
+.add-hotline-btn:hover {
+
+
+    background: #222;
+
+    color: white;
+
+}
+
+
+
+
+
+.hotline-modal {
+
+
+    border-radius: 20px;
+
+    padding: 10px;
+
+}
+
+
+
+.modal-title {
+
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+
+}
+
+
+
+.hotline-modal label {
+
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    color: #777;
+
+
+}
+
+
+
+.hotline-modal input,
+.hotline-modal textarea {
+
+
+    border-radius: 10px;
+
+    padding: 12px;
+
+    font-size: 14px;
+
+    border: 1px solid #ddd;
+
+
+}
+
+
+
+.save-btn {
+
+
+    background: #000;
+
+    color: white;
+
+    border-radius: 10px;
+
+    padding: 10px 25px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+
+}
+
+
+
+.save-btn:hover {
+
+
+    background: #222;
+
+    color: white;
+
+
+}
+
+
+
+.cancel-btn {
+
+
+    background: #f1f1f1;
+
+    border-radius: 10px;
+
+    padding: 10px 25px;
+
+    font-size: 13px;
+
+
+}
+
+
+
+
+.table input {
+
+
+    font-size: 13px;
+
+}
+
+
+
+/* MODAL FIX */
+
+#addHotlineModal {
+    z-index: 99999 !important;
+}
+
+#addHotlineModal .modal-dialog {
+    z-index: 100000 !important;
+}
+
+#addHotlineModal .modal-content {
+    background: #fff !important;
+    pointer-events: auto !important;
+}
+
+#addHotlineModal .form-control,
+#addHotlineModal textarea {
+
+    background: #fff !important;
+    color: #000 !important;
+
+    border: 1px solid #dcdcdc !important;
+
+    pointer-events: auto !important;
+    user-select: text !important;
+}
+
+#addHotlineModal .form-control:focus,
+#addHotlineModal textarea:focus {
+
+    background: #fff !important;
+    color: #000 !important;
+
+    border-color: #223868 !important;
+
+    box-shadow: 0 0 0 .15rem rgba(34, 56, 104, .15);
+}
+
+.modal-backdrop {
+    z-index: 99998 !important;
+}
+
+.table tbody td input,
+.table tbody td textarea {
+    color: #000000 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+

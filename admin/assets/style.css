@@ -314,14 +314,11 @@ tr:last-child td {
     min-height: 0;
 }
 
-.form-control,
-.form-select {
+.dash-card .form-control,
+.dash-card .form-select {
     background-color: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255,255,255,.3);
     color: var(--white);
-    font-size: 0.85rem;
-    margin-bottom: 5px;
-    padding: 8px 10px;
 }
 
 .form-control::placeholder {
@@ -406,4 +403,450 @@ tr:last-child td {
 
 .nav-item.active .nav-link i {
     color: #052241;
+}
+
+.add-hotline-btn {
+
+
+    background: #000;
+
+    color: white;
+
+    border-radius: 30px;
+
+    padding: 10px 22px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    border: none;
+
+
+}
+
+
+
+.add-hotline-btn:hover {
+
+
+    background: #222;
+
+    color: white;
+
+}
+
+
+
+
+
+/* ==========================
+HOTLINE CARD
+========================== */
+
+
+.card {
+
+
+    border: none;
+
+    border-radius: 20px;
+
+    box-shadow: 0 5px 20px rgba(0, 0, 0, .08);
+
+    transition: .3s;
+
+
+}
+
+
+
+.card:hover {
+
+
+    transform: translateY(-5px);
+
+
+}
+
+
+
+
+.card-body {
+
+
+    padding: 25px;
+
+
+}
+
+
+
+.card h5 {
+
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    margin-bottom: 15px;
+
+
+}
+
+
+
+.card p {
+
+
+    font-size: 14px;
+
+    color: #666;
+
+
+}
+
+
+
+.card strong {
+
+
+    color: #111;
+
+}
+
+
+
+/* ==========================
+ACTION BUTTONS
+========================== */
+
+
+.btn-warning {
+
+
+    background: #f5b800;
+
+    border: none;
+
+    border-radius: 10px;
+
+    padding: 8px 16px;
+
+    font-size: 12px;
+
+
+}
+
+
+
+.btn-danger {
+
+
+    border-radius: 10px;
+
+    padding: 8px 16px;
+
+    font-size: 12px;
+
+
+}
+
+
+
+
+
+/* ==========================
+MODAL
+========================== */
+
+
+.modal-content {
+
+
+    border: none;
+
+    border-radius: 20px;
+
+    padding: 10px;
+
+
+}
+
+
+
+.modal-header {
+
+
+    border: none;
+
+
+}
+
+
+
+.modal-title {
+
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+
+}
+
+
+
+
+.modal-body label {
+
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    color: #777;
+
+
+}
+
+
+
+
+.modal-body input,
+.modal-body textarea {
+
+
+    border-radius: 12px;
+
+    padding: 12px;
+
+    font-size: 14px;
+
+    border: 1px solid #ddd;
+
+
+}
+
+
+
+.modal-body input:focus,
+.modal-body textarea:focus {
+
+
+    box-shadow: none;
+
+    border-color: #000;
+
+
+}
+
+
+
+
+/* ==========================
+MODAL BUTTONS
+========================== */
+
+
+.modal-footer {
+
+
+    border: none;
+
+
+}
+
+
+
+.modal-footer .btn-secondary {
+
+
+    background: #f1f1f1;
+
+    color: #333;
+
+    border: none;
+
+    border-radius: 10px;
+
+    padding: 10px 25px;
+
+}
+
+
+
+.modal-footer .btn-primary {
+
+
+    background: #000;
+
+    border: none;
+
+    border-radius: 10px;
+
+    padding: 10px 25px;
+
+    font-weight: 600;
+
+}
+
+/* ==================================================
+   DASHBOARD FORM CONTROLS ONLY
+================================================== */
+
+.dash-card .form-control,
+.dash-card .form-select {
+
+    background-color: transparent;
+    border: 1px solid rgba(255,255,255,.3);
+    color: var(--white);
+
+    font-size: .85rem;
+    margin-bottom: 5px;
+    padding: 8px 10px;
+}
+
+.dash-card .form-control::placeholder {
+
+    color: rgba(255,255,255,.5) !important;
+}
+
+.dash-card .form-control:focus,
+.dash-card .form-select:focus {
+
+    background-color: rgba(255,255,255,.05);
+    color: var(--white);
+
+    box-shadow: none;
+    border-color: var(--white);
+}
+
+
+/* ==================================================
+   BOOTSTRAP MODAL FIX
+================================================== */
+
+.modal {
+
+    z-index: 999999 !important;
+}
+
+.modal-dialog {
+
+    z-index: 1000000 !important;
+}
+
+.modal-content {
+
+    border: none;
+    border-radius: 20px;
+    padding: 10px;
+
+    pointer-events: auto !important;
+}
+
+.modal-backdrop {
+
+    z-index: 999998 !important;
+}
+
+
+/* ==================================================
+   ADD HOTLINE MODAL ONLY
+================================================== */
+
+#addHotlineModal .modal-header {
+
+    border: none;
+}
+
+#addHotlineModal .modal-title {
+
+    font-size: 20px;
+    font-weight: 700;
+    color: #223868;
+}
+
+#addHotlineModal .modal-body label {
+
+    font-size: 11px;
+    font-weight: 700;
+    color: #777;
+
+    display: block;
+    margin-bottom: 6px;
+}
+
+#addHotlineModal .form-control {
+
+    background: #ffffff !important;
+    color: #000000 !important;
+
+    border: 1px solid #dcdcdc !important;
+    border-radius: 12px;
+
+    padding: 12px;
+
+    pointer-events: auto !important;
+
+    position: relative;
+    z-index: 1000001;
+}
+
+#addHotlineModal textarea.form-control {
+
+    resize: none;
+}
+
+#addHotlineModal .form-control::placeholder {
+
+    color: #999 !important;
+}
+
+#addHotlineModal .form-control:focus {
+
+    background: #fff !important;
+    color: #000 !important;
+
+    border-color: #223868 !important;
+
+    box-shadow: 0 0 0 .15rem rgba(34,56,104,.15);
+}
+
+#addHotlineModal .modal-footer {
+
+    border: none;
+}
+
+#addHotlineModal .btn-secondary {
+
+    background: #f1f1f1;
+    color: #333;
+
+    border: none;
+    border-radius: 10px;
+
+    padding: 10px 25px;
+}
+
+#addHotlineModal .btn-primary {
+
+    background: #223868;
+
+    border: none;
+    border-radius: 10px;
+
+    padding: 10px 25px;
+
+    font-weight: 600;
+}
+
+#addHotlineModal .btn-primary:hover {
+
+    background: #17294d;
+}
+
+.dash-card .table tbody tr td {
+    color: #000 !important;
 }
