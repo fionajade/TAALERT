@@ -16,6 +16,7 @@ export default function ProfileScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
   const [userName, setUserName] = useState('User');
+  const [reportCount, setReportCount] = useState(0);
 
   useEffect(() => {
     Animated.parallel([
@@ -23,25 +24,34 @@ export default function ProfileScreen() {
       Animated.spring(slideUpAnim, { toValue: 0, friction: 6, useNativeDriver: true }),
     ]).start();
 
-  const getUser = async () => {
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+    const getUser = async () => {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
 
-    if (error || !user) return;
+      if (error || !user) return;
 
-    console.log(user); // Check what fields are available
+      console.log(user); // Check what fields are available
 
-    setUserName(
-      user.user_metadata?.full_name ||
-      user.user_metadata?.name ||
-      user.email?.split('@')[0] ||
-      'User'
-    );
-  };
+      setUserName(
+        user.user_metadata?.full_name ||
+        user.user_metadata?.name ||
+        user.email?.split('@')[0] ||
+        'User'
+      );
 
-  getUser();
+      const { count, error: countError } = await supabase
+        .from('reports')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      if (!countError) {
+        setReportCount(count || 0);
+      }
+    };
+
+    getUser();
   }, []);
 
   return (
@@ -56,7 +66,7 @@ export default function ProfileScreen() {
 
       <Animated.View style={{ flex: 1, opacity: fadeAnim, transform: [{ translateY: slideUpAnim }] }}>
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          
+
           {/* Main Profile Card */}
           <View style={styles.profileCard}>
             <View style={styles.avatar}>
@@ -69,16 +79,16 @@ export default function ProfileScreen() {
                 <Text style={styles.locationText}>Brgy. Banga, Talisay, Batangas</Text>
               </View>
               <View style={styles.badge}>
-                <Text style={styles.badgeText}>VERIFIED RESIDENT</Text>
+                <Text style={styles.badgeText}>PENDING RESIDENT</Text>
               </View>
             </View>
           </View>
 
           {/* Stats Row */}
           <View style={styles.statsRow}>
-            <StatCard value="12" label="REPORTS" /> 
-            <StatCard value="38" label="ALERTS" />
-            <StatCard value="142" label="SAFE DAYS" />
+            <StatCard value={reportCount} label="REPORTS" />
+            <StatCard value="0" label="ALERTS" />
+            <StatCard value="0" label="SAFE DAYS" />
           </View>
 
           {/* Menu List */}

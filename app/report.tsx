@@ -25,12 +25,12 @@ const REPORT_TYPES = ['Ashfall', 'Tremor', 'Smoke', 'Injury', 'Other'];
 
 export default function ReportScreen() {
     const router = useRouter();
-    
+
     const [selectedType, setSelectedType] = useState('Ashfall');
     const [location, setLocation] = useState('');
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
-    
+
     const [image, setImage] = useState<{ uri: string; ext: string } | null>(null);
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -54,21 +54,30 @@ export default function ReportScreen() {
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 0.2, 
+            quality: 0.2,
         });
 
         if (!result.canceled) {
             const uri = result.assets[0].uri;
-            const ext = uri.split('.').pop()?.toLowerCase() || 'jpeg'; 
-            
+            const ext = uri.split('.').pop()?.toLowerCase() || 'jpeg';
+
             setImage({
                 uri: uri,
-                ext: ext === 'jpg' ? 'jpeg' : ext, 
+                ext: ext === 'jpg' ? 'jpeg' : ext,
             });
         }
     };
 
     const handleSubmit = async () => {
+
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+            Alert.alert("Error", "You must be logged in.");
+            return;
+        }
         if (!location.trim() || !description.trim()) {
             Alert.alert("Missing Information", "Please fill in both the location and description.");
             return;
@@ -80,7 +89,7 @@ export default function ReportScreen() {
             let photoUrl = null;
 
             if (image) {
-                const fileName = `${Date.now()}.${image.ext}`; 
+                const fileName = `${Date.now()}.${image.ext}`;
                 const response = await fetch(image.uri);
                 const blob = await response.blob();
                 const { error: uploadError } = await supabase
@@ -94,23 +103,24 @@ export default function ReportScreen() {
                 if (uploadError) {
                     Alert.alert("Storage Error!", uploadError.message);
                     setLoading(false);
-                    return; 
+                    return;
                 }
-                
+
                 const { data: publicUrlData } = supabase
                     .storage
                     .from('report-images')
                     .getPublicUrl(fileName);
-                
-                photoUrl = publicUrlData.publicUrl; 
+
+                photoUrl = publicUrlData.publicUrl;
             }
-            
+
             const { error: dbError } = await supabase
                 .from('reports')
                 .insert([
-                    { 
-                        type: selectedType, 
-                        location: location.trim(), 
+                    {
+                        user_id: user.id,
+                        type: selectedType,
+                        location: location.trim(),
                         description: description.trim(),
                         photo_url: photoUrl
                     }
@@ -126,7 +136,7 @@ export default function ReportScreen() {
             setLocation('');
             setDescription('');
             setImage(null);
-            router.replace('/home'); 
+            router.replace('/home');
 
         } catch (error: any) {
             Alert.alert("System Error", error.message || "An unexpected error occurred.");
@@ -189,9 +199,9 @@ export default function ReportScreen() {
                     </View>
 
                     <Text style={styles.label}>PHOTO</Text>
-                    <TouchableOpacity 
-                        style={[styles.photoBox, image && { padding: 0, overflow: 'hidden' }]} 
-                        onPress={pickImage} 
+                    <TouchableOpacity
+                        style={[styles.photoBox, image && { padding: 0, overflow: 'hidden' }]}
+                        onPress={pickImage}
                     >
                         {image ? (
                             <>
