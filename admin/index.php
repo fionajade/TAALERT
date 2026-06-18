@@ -3,7 +3,7 @@ $host = 'aws-1-ap-northeast-1.pooler.supabase.com';
 $port = '6543';
 $dbname = 'postgres';
 $user = 'postgres.okwnknzodfvbsbgetvzh';
-$password = 'taliresq67_';
+$password = 'taliresq67_'; 
 
 $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
 
@@ -32,36 +32,37 @@ try {
     ");
     $totalUsers = $stmt->fetch()['total'];
 
-    // Total reports
+    // Total incidents (reports)
     $stmt = $pdo->query("
         SELECT COUNT(*) AS total
-        FROM reports
+        FROM incidents
     ");
     $totalReports = $stmt->fetch()['total'];
 
-    // Recent reports
+    // Recent incidents
     $stmt = $pdo->query("
     SELECT
         id,
         created_at,
-        type,
+        category,  -- Changed from 'type' to 'category'
         location,
+        status,    -- Added 'status' to display dynamically
         description,
         photo_url
-    FROM reports
+    FROM incidents
     ORDER BY created_at DESC
     LIMIT 10
     ");
 
     $reports = $stmt->fetchAll();
 
-    //Reports by type for the donut chart
+    // Incidents by category for the donut chart
     $stmt = $pdo->query("
     SELECT
-        type,
+        category,  -- Changed from 'type' to 'category'
         COUNT(*) AS total
-    FROM reports
-    GROUP BY type
+    FROM incidents
+    GROUP BY category
     ORDER BY total DESC
     ");
 
@@ -72,7 +73,7 @@ try {
     SELECT
         DATE(created_at) AS report_date,
         COUNT(*) AS total
-    FROM reports
+    FROM incidents
     GROUP BY DATE(created_at)
     ORDER BY report_date ASC
     ");
@@ -149,7 +150,7 @@ try {
                                 <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>TYPE</th>
+                                        <th>CATEGORY</th>
                                         <th>LOCATION</th>
                                         <th>STATUS</th>
                                         <th>DATE</th>
@@ -174,13 +175,15 @@ try {
                                             <tr>
                                                 <td><?php echo htmlspecialchars($report['id']); ?></td>
                                                 <td>
-                                                    <?php echo htmlspecialchars($report['type']); ?>
+                                                    <!-- Updated to category -->
+                                                    <?php echo htmlspecialchars($report['category']); ?>
                                                 </td>
                                                 <td>
                                                     <?php echo htmlspecialchars($report['location']); ?>
                                                 </td>
-                                                <td>
-                                                    Reported
+                                                <td style="font-weight: 600;">
+                                                    <!-- Dynamically showing status and capitalizing the first letter -->
+                                                    <?php echo ucfirst(htmlspecialchars($report['status'])); ?>
                                                 </td>
                                                 <td>
                                                     <?php echo date(
@@ -218,7 +221,8 @@ try {
                             <div class="legend-item">
                                 <div class="dot" style="background-color: <?php echo $colors[$index % count($colors)]; ?>">
                                 </div>
-                                <?php echo htmlspecialchars($item['type']); ?>
+                                <!-- Updated to category -->
+                                <?php echo htmlspecialchars($item['category']); ?>
                                 (<?php echo $item['total']; ?>)
                             </div>
                         <?php endforeach; ?>
@@ -298,7 +302,8 @@ try {
         Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
 
         // Donut Chart
-        const labels = incidentData.map(item => item.type);
+        // FIXED: Changed item.type to item.category
+        const labels = incidentData.map(item => item.category);
         const values = incidentData.map(item => Number(item.total));
         const chartColors = [
             '#d9534f',
