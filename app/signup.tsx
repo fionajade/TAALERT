@@ -1,12 +1,15 @@
 import { Feather } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Animated,
+  Image,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -35,6 +38,7 @@ export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [image, setImage] = useState<{ uri: string; ext: string } | null>(null);
   const [loading, setLoading] = useState(false); 
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -47,35 +51,97 @@ export default function SignUpScreen() {
     ]).start();
   }, []);
 
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'We need permissions to open your gallery.');
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1], // 1:1 ratio works best for avatars/profiles
+      quality: 0.2,
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      const ext = uri.split('.').pop()?.toLowerCase() || 'jpeg';
+
+      setImage({
+        uri: uri,
+        ext: ext === 'jpg' ? 'jpeg' : ext,
+      });
+    }
+  };
+
   const handleSignUp = async () => {
-    if (!email || !password) {
-      Alert.alert('Hold on!', 'Please enter an email and password.');
+    if (!name || !email || !password) {
+      Alert.alert('Hold on!', 'Please enter your name, email, and password.');
       return;
     }
 
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-      options: {
-        data: {
-          full_name: name, 
+    try {
+      // 1. Sign up the user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            full_name: name, 
+          }
+        }
+      });
+
+      if (authError) {
+        Alert.alert('Error', authError.message);
+        setLoading(false);
+        return;
+      }
+
+      // 2. Upload Profile Photo if an image was selected
+      // Note: This works best if email confirmation is disabled so the user is logged in automatically.
+      if (image && authData.user) {
+        const fileName = `avatar-${authData.user.id}-${Date.now()}.${image.ext}`;
+        const response = await fetch(image.uri);
+        const blob = await response.blob();
+        
+        // Ensure you have a storage bucket named 'avatars' in your Supabase project!
+        const { error: uploadError } = await supabase
+          .storage
+          .from('avatars') 
+          .upload(fileName, blob, {
+            contentType: `image/${image.ext}`,
+            upsert: true,
+          });
+
+        if (!uploadError) {
+          const { data: publicUrlData } = supabase
+            .storage
+            .from('avatars')
+            .getPublicUrl(fileName);
+
+          // Update the user's auth metadata with the avatar URL
+          await supabase.auth.updateUser({
+            data: { avatar_url: publicUrlData.publicUrl }
+          });
+        } else {
+          console.log("Image Upload Error:", uploadError.message);
+          // We don't block the sign-up success message if just the image fails
         }
       }
-    });
 
-    setLoading(false);
-
-    if (error) {
-      Alert.alert('Error', error.message);
-    } else {
-      Alert.alert('Success!', 'Check your email for the confirmation link.');
+      Alert.alert('Success!', 'Your account has been created.');
       // pag nakadisable email confirmation sa supabase
       router.replace('/home'); 
-      
-      // pag naman bubuksan na sha
-      // router.back();
+
+    } catch (error: any) {
+      Alert.alert("System Error", error.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -103,86 +169,112 @@ export default function SignUpScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Header Texts */}
-          <View style={styles.headerContainer}>
-            <Text style={styles.titleText}>Create Account ✨</Text>
-            <Text style={styles.subText}>Sign up to get real-time disaster alerts and stay protected.</Text>
-          </View>
-
-          {/* Form Inputs */}
-          <View style={styles.formContainer}>
-            
-            {/* Full Name Input */}
-            <View style={styles.inputWrapper}>
-              <Feather name="user" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Full Name"
-                placeholderTextColor={COLORS.textMuted}
-                autoCapitalize="words"
-                value={name}
-                onChangeText={setName}
-              />
+          {/* Form Content inside ScrollView to handle smaller screens + keyboard */}
+          <ScrollView 
+            contentContainerStyle={styles.scrollContent} 
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Header Texts */}
+            <View style={styles.headerContainer}>
+              <Text style={styles.titleText}>Create Account ✨</Text>
+              <Text style={styles.subText}>Sign up to get real-time disaster alerts and stay protected.</Text>
             </View>
 
-            {/* Email Input */}
-            <View style={styles.inputWrapper}>
-              <Feather name="mail" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Email address"
-                placeholderTextColor={COLORS.textMuted}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={email}
-                onChangeText={setEmail}
-              />
-            </View>
-
-            {/* Password Input */}
-            <View style={styles.inputWrapper}>
-              <Feather name="lock" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Create Password"
-                placeholderTextColor={COLORS.textMuted}
-                secureTextEntry={!showPassword}
-                value={password}
-                onChangeText={setPassword}
-              />
-              <TouchableOpacity 
-                style={styles.eyeIcon} 
-                onPress={() => setShowPassword(!showPassword)}
-              >
-                <Feather 
-                  name={showPassword ? "eye" : "eye-off"} 
-                  size={20} 
-                  color={COLORS.textMuted} 
+            {/* Form Inputs */}
+            <View style={styles.formContainer}>
+              
+              {/* Full Name Input */}
+              <View style={styles.inputWrapper}>
+                <Feather name="user" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Full Name"
+                  placeholderTextColor={COLORS.textMuted}
+                  autoCapitalize="words"
+                  value={name}
+                  onChangeText={setName}
                 />
+              </View>
+
+              {/* Email Input */}
+              <View style={styles.inputWrapper}>
+                <Feather name="mail" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Email address"
+                  placeholderTextColor={COLORS.textMuted}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={email}
+                  onChangeText={setEmail}
+                />
+              </View>
+
+              {/* Password Input */}
+              <View style={styles.inputWrapper}>
+                <Feather name="lock" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Create Password"
+                  placeholderTextColor={COLORS.textMuted}
+                  secureTextEntry={!showPassword}
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <TouchableOpacity 
+                  style={styles.eyeIcon} 
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Feather 
+                    name={showPassword ? "eye" : "eye-off"} 
+                    size={20} 
+                    color={COLORS.textMuted} 
+                  />
+                </TouchableOpacity>
+              </View>
+
+              {/* Profile Photo Upload */}
+              <Text style={styles.uploadLabel}>Profile Photo (Optional)</Text>
+              <TouchableOpacity
+                style={[styles.photoBox, image && { padding: 0, overflow: 'hidden' }]}
+                onPress={pickImage}
+              >
+                {image ? (
+                  <>
+                    <Image source={{ uri: image.uri }} style={{ width: '100%', height: 100 }} />
+                    <View style={styles.editIconContainer}>
+                      <Feather name="edit-2" size={20} color="#fff" />
+                    </View>
+                  </>
+                ) : (
+                  <>
+                    <Feather name="camera" size={24} color={COLORS.primaryBlue} />
+                    <Text style={styles.photoText}>Tap to upload photo</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+
+              {/* Sign Up Button */}
+              <TouchableOpacity 
+                style={[styles.signUpBtn, loading && { opacity: 0.7 }]} 
+                onPress={handleSignUp}
+                activeOpacity={0.8}
+                disabled={loading} 
+              >
+                <Text style={styles.signUpBtnText}>
+                  {loading ? 'Signing Up...' : 'Sign Up'}
+                </Text>
               </TouchableOpacity>
             </View>
 
-            {/* Sign Up Button */}
-            <TouchableOpacity 
-              style={[styles.signUpBtn, loading && { opacity: 0.7 }]} 
-              onPress={handleSignUp}
-              activeOpacity={0.8}
-              disabled={loading} 
-            >
-              <Text style={styles.signUpBtnText}>
-                {loading ? 'Signing Up...' : 'Sign Up'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Footer Log In */}
-          <View style={styles.footerContainer}>
-            <Text style={styles.footerText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => router.back()}>
-              <Text style={styles.logInText}>Log In</Text>
-            </TouchableOpacity>
-          </View>
-
+            {/* Footer Log In */}
+            <View style={styles.footerContainer}>
+              <Text style={styles.footerText}>Already have an account? </Text>
+              <TouchableOpacity onPress={() => router.back()}>
+                <Text style={styles.logInText}>Log In</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         </Animated.View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -196,7 +288,12 @@ const styles = StyleSheet.create({
   },
   innerContainer: {
     flex: 1,
+  },
+  scrollContent: {
     paddingHorizontal: 24,
+    paddingTop: Platform.OS === 'android' ? 60 : 40,
+    paddingBottom: 40,
+    flexGrow: 1,
     justifyContent: 'center',
   },
   topBar: {
@@ -211,7 +308,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     marginBottom: 40,
-    marginTop: 40, 
+    marginTop: 20, 
   },
   titleText: {
     fontSize: 28,
@@ -248,13 +345,46 @@ const styles = StyleSheet.create({
   eyeIcon: {
     padding: 8,
   },
+  uploadLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+    marginBottom: 8,
+    marginTop: 4,
+    marginLeft: 4,
+    textTransform: 'uppercase',
+  },
+  photoBox: {
+    width: '100%',
+    height: 100,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    borderStyle: 'dashed',
+    borderRadius: 16,
+    backgroundColor: '#F8FAFC',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  photoText: {
+    color: '#64748B',
+    fontSize: 14,
+    marginTop: 8,
+    fontWeight: '500',
+  },
+  editIconContainer: {
+    position: 'absolute',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 8,
+    borderRadius: 20,
+  },
   signUpBtn: {
     backgroundColor: COLORS.primaryBlue,
     borderRadius: 16,
     height: 60,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 16, 
+    marginTop: 8, 
     shadowColor: COLORS.primaryBlue,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -270,7 +400,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 10,
   },
   footerText: {
     color: COLORS.textMuted,
