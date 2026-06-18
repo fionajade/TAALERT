@@ -1,5 +1,6 @@
 import { supabase } from '@/src/services/supabase';
 import { Feather } from '@expo/vector-icons';
+import { router } from 'expo-router'; // 1. Import router
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -95,7 +96,15 @@ export default function ProfileScreen() {
           <View style={styles.menuContainer}>
             <MenuItem icon="bell" label="Notification preferences" color="#25A5FE" bg="#E0F2FE" />
             <MenuItem icon="shield" label="Emergency contacts" color="#25A5FE" bg="#E0F2FE" />
-            <MenuItem icon="log-out" label="Sign out" color="#EF4444" bg="#FEE2E2" isLast />
+            {/* 2. Pass the onPress action here */}
+            <MenuItem 
+              icon="log-out" 
+              label="Sign out" 
+              color="#EF4444" 
+              bg="#FEE2E2" 
+              isLast 
+              onPress={() => router.replace('/')} 
+            />
           </View>
 
           <View style={{ height: 100 }} />
@@ -116,8 +125,12 @@ const StatCard = ({ value, label }: any) => (
 );
 
 // Menu Item
-const MenuItem = ({ icon, label, sub, color, bg, isLast }: any) => (
-  <TouchableOpacity style={[styles.menuItem, isLast && { borderBottomWidth: 0 }]}>
+// 3. Add `onPress` to the destructured props and attach it to the TouchableOpacity
+const MenuItem = ({ icon, label, sub, color, bg, isLast, onPress }: any) => (
+  <TouchableOpacity 
+    style={[styles.menuItem, isLast && { borderBottomWidth: 0 }]}
+    onPress={onPress}
+  >
     <View style={[styles.menuIconBox, { backgroundColor: bg }]}>
       <Feather name={icon} size={18} color={color} />
     </View>
