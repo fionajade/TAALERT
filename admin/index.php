@@ -98,6 +98,7 @@ try {
     <!-- Leaflet CSS for the Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="icon" type="image/png" href="assets/log.png">
 </head>
 
 <body>
@@ -106,13 +107,7 @@ try {
     <!-- Main Content -->
     <main class="main-content">
         <!-- Top Navigation Area -->
-        <header class="top-bar">
-            <h1 class="top-title">TaliResQ</h1>
-            <div class="top-icons">
-                <i class="bi bi-bell"></i>
-                <i class="bi bi-person"></i>
-            </div>
-        </header>
+
 
         <!-- White Dashboard Area -->
         <div class="dashboard-wrapper">

@@ -20,10 +20,6 @@ session_start();
 
     <main class="main-content">
 
-        <header class="top-bar">
-            <h1 class="top-title">TAALERT</h1>
-        </header>
-
         <div class="dashboard-wrapper">
             <h2 class="dashboard-title">ALERTS</h2>
 

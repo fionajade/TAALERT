@@ -25,12 +25,6 @@ session_start();
 
     <main class="main-content">
 
-            <div class="top-icons">
-                <i class="bi bi-bell"></i>
-                <i class="bi bi-person"></i>
-            </div>
-        </header>
-
         <div class="dashboard-wrapper">
 
             <h2 class="dashboard-title">REPORT INCIDENT</h2>

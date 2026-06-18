@@ -3,9 +3,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
 ?>
 
 <aside class="sidebar">
-    <div class="logo-container">
-        <img src="assets/logo.png" alt="TAALERT Logo"
-            style="height: 35px; width: auto; object-fit: contain;">
+    <div class="logo-container d-flex align-items-center justify-content-center gap-2">
+        <img src="assets/logo1.png" alt="TAALERT Logo"
+            style="height: 25px; width: auto; object-fit: contain;">
+        <h2 class="top-title">TaliResq</h2>
     </div>
 
     <ul class="nav-menu">
