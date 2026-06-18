@@ -1,5 +1,3 @@
-import 'react-native-url-polyfill/auto';
-
 import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
@@ -8,14 +6,14 @@ import {
     ActivityIndicator,
     Alert,
     Animated,
-    Image,
-    SafeAreaView,
+    Image, Modal, SafeAreaView,
     ScrollView,
     Text,
     TextInput,
     TouchableOpacity,
     View
 } from 'react-native';
+import 'react-native-url-polyfill/auto';
 
 import BottomNavbar from '../components/BottomNavbar';
 import { ReportStyles as styles } from '../constants/theme';
@@ -30,11 +28,33 @@ export default function ReportScreen() {
     const [location, setLocation] = useState('');
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
+    const [successVisible, setSuccessVisible] = useState(false);
+
+    const scaleAnim = useRef(new Animated.Value(0)).current;
 
     const [image, setImage] = useState<{ uri: string; ext: string } | null>(null);
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideUpAnim = useRef(new Animated.Value(30)).current;
+
+    const showSuccessModal = () => {
+        setSuccessVisible(true);
+
+        scaleAnim.setValue(0);
+
+        Animated.sequence([
+            Animated.spring(scaleAnim, {
+                toValue: 1.15,
+                friction: 4,
+                useNativeDriver: true,
+            }),
+            Animated.spring(scaleAnim, {
+                toValue: 1,
+                friction: 6,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    };
 
     useEffect(() => {
         Animated.parallel([
@@ -132,11 +152,11 @@ export default function ReportScreen() {
                 return;
             }
 
-            Alert.alert("SUCCESS!", "Your report and photo have been fully submitted.");
             setLocation('');
             setDescription('');
             setImage(null);
-            router.replace('/home');
+
+            showSuccessModal();
 
         } catch (error: any) {
             Alert.alert("System Error", error.message || "An unexpected error occurred.");
@@ -232,6 +252,96 @@ export default function ReportScreen() {
                 </TouchableOpacity>
             </View>
 
+            <Modal
+                visible={successVisible}
+                transparent
+                animationType="fade"
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(0,0,0,0.45)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Animated.View
+                        style={{
+                            width: 300,
+                            backgroundColor: '#fff',
+                            borderRadius: 24,
+                            padding: 30,
+                            alignItems: 'center',
+                            transform: [{ scale: scaleAnim }],
+                        }}
+                    >
+                        <View
+                            style={{
+                                width: 90,
+                                height: 90,
+                                borderRadius: 45,
+                                backgroundColor: '#22C55E',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                marginBottom: 20,
+                            }}
+                        >
+                            <Feather
+                                name="check"
+                                size={50}
+                                color="#fff"
+                            />
+                        </View>
+
+                        <Text
+                            style={{
+                                fontSize: 24,
+                                fontWeight: '700',
+                                color: '#0F172A',
+                                marginBottom: 8,
+                            }}
+                        >
+                            Report Submitted
+                        </Text>
+
+                        <Text
+                            style={{
+                                textAlign: 'center',
+                                color: '#64748B',
+                                fontSize: 15,
+                                marginBottom: 25,
+                                lineHeight: 22,
+                            }}
+                        >
+                            Thank you! Your report has been successfully submitted and will help keep everyone informed.
+                        </Text>
+
+                        <TouchableOpacity
+                            style={{
+                                backgroundColor: '#25A5FE',
+                                width: '100%',
+                                paddingVertical: 14,
+                                borderRadius: 14,
+                                alignItems: 'center',
+                            }}
+                            onPress={() => {
+                                setSuccessVisible(false);
+                                router.replace('/home');
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    color: '#fff',
+                                    fontWeight: '700',
+                                    fontSize: 16,
+                                }}
+                            >
+                                OK
+                            </Text>
+                        </TouchableOpacity>
+                    </Animated.View>
+                </View>
+            </Modal>
             <BottomNavbar activeTab="plus" />
         </SafeAreaView>
     );

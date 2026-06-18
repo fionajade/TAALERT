@@ -109,7 +109,7 @@ export default function LoginScreen() {
 
           {/* Header */}
           <View style={styles.headerContainer}>
-            <Text style={styles.welcomeText}>Welcome back 👋</Text>
+            <Text style={styles.welcomeText}>Welcome Back 👋</Text>
             <Text style={styles.subText}>
               Log in to receive real-time disaster alerts and stay safe.
             </Text>
