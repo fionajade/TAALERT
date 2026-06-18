@@ -2,7 +2,6 @@ import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Alert,
   Animated,
   KeyboardAvoidingView,
   Platform,
@@ -12,7 +11,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
 import { supabase } from '../src/services/supabase';
@@ -37,6 +36,7 @@ export default function LoginScreen() {
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
+  const [error, setError] = useState('');
 
   useEffect(() => {
     Animated.parallel([
@@ -56,11 +56,12 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     try {
       if (!email.trim() || !password.trim()) {
-        Alert.alert('Error', 'Please enter your email and password');
+        setError('Please enter your email and password');
         return;
       }
 
       setLoading(true);
+      setError('');
 
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
@@ -68,7 +69,7 @@ export default function LoginScreen() {
       });
 
       if (error) {
-        Alert.alert('Login Failed', error.message);
+        setError(error.message);
         return;
       }
       
@@ -77,7 +78,7 @@ export default function LoginScreen() {
 
     } catch (err) {
       console.log('Catch Error:', err);
-      Alert.alert('Error', 'Something went wrong');
+      setError('Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -158,6 +159,10 @@ export default function LoginScreen() {
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 
+{error ? (
+  <Text style={styles.errorText}>{error}</Text>
+) : null}
+
             {/* Login */}
             <TouchableOpacity
               style={styles.loginBtn}
@@ -190,6 +195,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
+  errorText: {
+  color: 'red',
+  textAlign: 'center',
+  marginBottom: 16,
+  fontSize: 14,
+},
   innerContainer: {
     flex: 1,
     paddingHorizontal: 24,
