@@ -102,7 +102,7 @@ export default function DisasterAppUI() {
               </View>
               <View>
                 <Text style={styles.sosTitle}>Emergency{'\n'}SOS</Text>
-                <Text style={styles.sosSub}>Hold to alert responders</Text>
+                <Text style={styles.sosSub}>Press to alert responders</Text>
               </View>
             </TouchableOpacity>
 

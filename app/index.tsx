@@ -72,7 +72,6 @@ export default function LoginScreen() {
         setError(error.message);
         return;
       }
-      
       // BASTA PAG SUCCESSFUL PUNTA HOME
       router.replace('/home');
 
@@ -159,9 +158,9 @@ export default function LoginScreen() {
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 
-{error ? (
-  <Text style={styles.errorText}>{error}</Text>
-) : null}
+            {error ? (
+              <Text style={styles.errorText}>{error}</Text>
+            ) : null}
 
             {/* Login */}
             <TouchableOpacity
@@ -196,11 +195,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   errorText: {
-  color: 'red',
-  textAlign: 'center',
-  marginBottom: 16,
-  fontSize: 14,
-},
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 16,
+    fontSize: 14,
+  },
   innerContainer: {
     flex: 1,
     paddingHorizontal: 24,
