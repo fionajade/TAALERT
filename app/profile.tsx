@@ -1,6 +1,6 @@
 import { supabase } from '@/src/services/supabase';
 import { Feather } from '@expo/vector-icons';
-import { router } from 'expo-router'; // 1. Import router
+import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -33,8 +33,7 @@ export default function ProfileScreen() {
 
       if (error || !user) return;
 
-      console.log(user); // Check what fields are available
-
+      console.log(user); 
       setUserName(
         user.user_metadata?.full_name ||
         user.user_metadata?.name ||
@@ -125,7 +124,6 @@ const StatCard = ({ value, label }: any) => (
 );
 
 // Menu Item
-// 3. Add `onPress` to the destructured props and attach it to the TouchableOpacity
 const MenuItem = ({ icon, label, sub, color, bg, isLast, onPress }: any) => (
   <TouchableOpacity 
     style={[styles.menuItem, isLast && { borderBottomWidth: 0 }]}
