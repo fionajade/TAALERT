@@ -135,19 +135,22 @@ export default function ReportScreen() {
             }
 
             const { error: dbError } = await supabase
-                .from('reports')
+                .from('incidents')
                 .insert([
                     {
                         user_id: user.id,
-                        type: selectedType,
+                        category: selectedType, // <--- FIXED: Changed from 'type' to 'category'
                         location: location.trim(),
                         description: description.trim(),
-                        photo_url: photoUrl
+                        photo_url: photoUrl,
+                        status: 'pending',     // <--- ADDED: To utilize the new schema
+                        priority: 'medium'     // <--- ADDED: Default priority
                     }
                 ]);
 
             if (dbError) {
                 Alert.alert("Database Error!", dbError.message);
+                console.error("DB Error: ", dbError); // Helps with debugging if it fails again
                 setLoading(false);
                 return;
             }

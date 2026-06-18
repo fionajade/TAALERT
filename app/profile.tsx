@@ -16,7 +16,11 @@ import { ProfileStyles as styles } from '../constants/theme';
 export default function ProfileScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
-  const [userName, setUserName] = useState('User');
+  
+  // State variables for dynamic user data
+  const [userName, setUserName] = useState('Loading...');
+  const [barangay, setBarangay] = useState('Loading...');
+  const [verificationStatus, setVerificationStatus] = useState('PENDING');
   const [reportCount, setReportCount] = useState(0);
 
   useEffect(() => {
@@ -25,24 +29,31 @@ export default function ProfileScreen() {
       Animated.spring(slideUpAnim, { toValue: 0, friction: 6, useNativeDriver: true }),
     ]).start();
 
-    const getUser = async () => {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
+    const fetchUserData = async () => {
+      // 1. Get the authenticated user ID
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) return;
 
-      if (error || !user) return;
+      // 2. Fetch the user's public profile from the `users` table we created
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('fullname, barangay, verification_status')
+        .eq('id', user.id)
+        .single();
 
-      console.log(user); 
-      setUserName(
-        user.user_metadata?.full_name ||
-        user.user_metadata?.name ||
-        user.email?.split('@')[0] ||
-        'User'
-      );
+      if (!profileError && profile) {
+        setUserName(profile.fullname || user.email?.split('@')[0] || 'User');
+        setBarangay(profile.barangay || 'Update your address');
+        setVerificationStatus(profile.verification_status?.toUpperCase() || 'PENDING');
+      } else {
+        // Fallback if profile fetch fails
+        setUserName(user.email?.split('@')[0] || 'User');
+        setBarangay('No barangay set');
+      }
 
+      // 3. Get the incident (report) count
       const { count, error: countError } = await supabase
-        .from('reports')
+        .from('incidents')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id);
 
@@ -51,7 +62,7 @@ export default function ProfileScreen() {
       }
     };
 
-    getUser();
+    fetchUserData();
   }, []);
 
   return (
@@ -70,16 +81,32 @@ export default function ProfileScreen() {
           {/* Main Profile Card */}
           <View style={styles.profileCard}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>M</Text>
+              {/* Dynamically show the first letter of the user's name */}
+              <Text style={styles.avatarText}>
+                {userName !== 'Loading...' ? userName.charAt(0).toUpperCase() : ''}
+              </Text>
             </View>
             <View style={styles.profileInfo}>
               <Text style={styles.userName}>{userName}</Text>
               <View style={styles.locationRow}>
                 <Feather name="map-pin" size={14} color="#64748B" />
-                <Text style={styles.locationText}>Brgy. Banga, Talisay, Batangas</Text>
+                <Text style={styles.locationText}>
+                  {barangay !== 'Update your address' && barangay !== 'Loading...' 
+                    ? `Brgy. ${barangay}, Talisay, Batangas` 
+                    : barangay}
+                </Text>
               </View>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>PENDING RESIDENT</Text>
+              <View style={[
+                  styles.badge, 
+                  // Optional: Change badge color if approved
+                  verificationStatus === 'APPROVED' && { backgroundColor: '#DCFCE7' }
+                ]}>
+                <Text style={[
+                  styles.badgeText, 
+                  verificationStatus === 'APPROVED' && { color: '#16A34A' }
+                ]}>
+                  {verificationStatus} RESIDENT
+                </Text>
               </View>
             </View>
           </View>
@@ -95,7 +122,6 @@ export default function ProfileScreen() {
           <View style={styles.menuContainer}>
             <MenuItem icon="bell" label="Notification preferences" color="#25A5FE" bg="#E0F2FE" />
             <MenuItem icon="shield" label="Emergency contacts" color="#25A5FE" bg="#E0F2FE" />
-            {/* 2. Pass the onPress action here */}
             <MenuItem 
               icon="log-out" 
               label="Sign out" 
