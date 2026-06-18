@@ -25,9 +25,6 @@ session_start();
 
     <main class="main-content">
 
-        <header class="top-bar">
-            <h1 class="top-title">TAALERT</h1>
-
             <div class="top-icons">
                 <i class="bi bi-bell"></i>
                 <i class="bi bi-person"></i>
