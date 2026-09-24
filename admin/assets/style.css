@@ -850,3 +850,654 @@ MODAL BUTTONS
 .dash-card .table tbody tr td {
     color: #000 !important;
 }
+
+/* ==========================================================
+   INCIDENT RECORDS
+   ========================================================== */
+
+
+/* ==========================================================
+   RECORDS HEADER
+   ========================================================== */
+
+.records-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.records-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+
+/* ==========================================================
+   PRIORITY BADGES
+   ========================================================== */
+
+.priority-badge,
+.severity-badge,
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 7px 12px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    min-width: 85px;
+
+    white-space: nowrap;
+}
+
+
+/* CRITICAL */
+
+.priority-critical {
+    background-color: #dc3545;
+    color: #ffffff;
+}
+
+
+/* HIGH */
+
+.priority-high {
+    background-color: #fd7e14;
+    color: #ffffff;
+}
+
+
+/* MEDIUM */
+
+.priority-medium {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+
+/* LOW */
+
+.priority-low {
+    background-color: #198754;
+    color: #ffffff;
+}
+
+
+/* ==========================================================
+   EXTREMITY / SEVERITY
+   ========================================================== */
+
+
+/* EXTREME */
+
+.severity-extreme {
+    background-color: #842029;
+    color: #ffffff;
+}
+
+
+/* SEVERE */
+
+.severity-severe {
+    background-color: #dc3545;
+    color: #ffffff;
+}
+
+
+/* MODERATE */
+
+.severity-moderate {
+    background-color: #0d6efd;
+    color: #ffffff;
+}
+
+
+/* MINOR */
+
+.severity-minor {
+    background-color: #198754;
+    color: #ffffff;
+}
+
+
+/* ==========================================================
+   STATUS BADGES
+   ========================================================== */
+
+
+/* PENDING */
+
+.status-pending {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+
+/* IN PROGRESS */
+
+.status-progress {
+    background-color: #0d6efd;
+    color: #ffffff;
+}
+
+
+/* RESOLVED */
+
+.status-resolved {
+    background-color: #198754;
+    color: #ffffff;
+}
+
+
+/* OTHER / DEFAULT STATUS */
+
+.status-default {
+    background-color: #6c757d;
+    color: #ffffff;
+}
+
+
+/* ==========================================================
+   RESOLVE BUTTON
+   ========================================================== */
+
+.resolve-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    padding: 7px 12px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    background: #198754;
+    color: #ffffff;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.resolve-btn:hover {
+    background: #146c43;
+    color: #ffffff;
+
+    transform: translateY(-1px);
+}
+
+.resolve-btn:active {
+    transform: translateY(0);
+}
+
+
+/* ==========================================================
+   ARCHIVE BUTTON
+   ========================================================== */
+
+.archive-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    padding: 9px 15px;
+
+    border-radius: 8px;
+
+    background: #6c757d;
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition: all 0.2s ease;
+}
+
+.archive-btn:hover {
+    background: #495057;
+    color: #ffffff;
+
+    transform: translateY(-1px);
+}
+
+
+/* ==========================================================
+   ACTIVE INCIDENTS BUTTON
+   ========================================================== */
+
+.active-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    padding: 9px 15px;
+
+    border-radius: 8px;
+
+    background: #0d6efd;
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition: all 0.2s ease;
+}
+
+.active-btn:hover {
+    background: #0b5ed7;
+    color: #ffffff;
+
+    transform: translateY(-1px);
+}
+
+
+/* ==========================================================
+   FILTER CARD
+   ========================================================== */
+
+.filter-card {
+    background: #f8f9fa;
+
+    border: 1px solid #e5e5e5;
+
+    border-radius: 12px;
+
+    padding: 18px;
+
+    margin-bottom: 20px;
+}
+
+
+/* FILTER LABEL */
+
+.filter-label {
+    display: block;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    color: #555555;
+
+    margin-bottom: 6px;
+}
+
+
+/* FILTER SELECT */
+
+.filter-select {
+    width: 100%;
+
+    border: 1px solid #ced4da;
+
+    border-radius: 8px;
+
+    padding: 9px 12px;
+
+    background: #ffffff;
+
+    color: #333333;
+
+    font-size: 13px;
+
+    outline: none;
+
+    transition: all 0.2s ease;
+}
+
+.filter-select:hover {
+    border-color: #adb5bd;
+}
+
+.filter-select:focus {
+    border-color: #0d6efd;
+
+    box-shadow:
+        0 0 0 0.15rem
+        rgba(13, 110, 253, 0.15);
+}
+
+
+/* ==========================================================
+   FILTER ACTIONS
+   ========================================================== */
+
+.filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-top: 5px;
+}
+
+
+/* APPLY FILTER BUTTON */
+
+.filter-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    padding: 9px 15px;
+
+    background: #223868;
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    background: #17294d;
+    color: #ffffff;
+
+    transform: translateY(-1px);
+}
+
+
+/* CLEAR FILTER BUTTON */
+
+.clear-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    padding: 9px 15px;
+
+    border-radius: 8px;
+
+    border: 1px solid #ced4da;
+
+    color: #555555;
+
+    background: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition: all 0.2s ease;
+}
+
+.clear-filter-btn:hover {
+    background: #f1f1f1;
+
+    color: #333333;
+
+    border-color: #adb5bd;
+}
+
+
+/* ==========================================================
+   INCIDENT TABLE
+   ========================================================== */
+
+.incident-table {
+    width: 100%;
+}
+
+.incident-table th {
+    white-space: nowrap;
+
+    vertical-align: middle;
+
+    text-align: center;
+}
+
+.incident-table td {
+    vertical-align: middle;
+
+    text-align: center;
+}
+
+
+/*
+ * Keep the incident name and location readable.
+ */
+
+.incident-table td:nth-child(2),
+.incident-table td:nth-child(3) {
+    text-align: left;
+}
+
+
+/* ==========================================================
+   EMPTY RECORDS
+   ========================================================== */
+
+.empty-records {
+    padding: 40px !important;
+
+    color: #777777 !important;
+
+    text-align: center;
+
+    font-size: 14px;
+}
+
+.empty-records i {
+    color: #999999;
+
+    display: block;
+
+    margin-bottom: 8px;
+}
+
+.empty-records small {
+    color: #999999;
+
+    font-size: 12px;
+}
+
+
+/* ==========================================================
+   ARCHIVE PAGE
+   ========================================================== */
+
+.archive-title {
+    color: #6c757d;
+}
+
+.archive-info {
+    font-size: 13px;
+
+    color: #777777;
+
+    margin-bottom: 15px;
+}
+
+
+/* ==========================================================
+   ARCHIVE TABLE
+   ========================================================== */
+
+.archive-info + .dash-card {
+    margin-top: 5px;
+}
+
+
+/* ==========================================================
+   RECORDS CARD
+   ========================================================== */
+
+/*
+ * Make sure the records table remains readable
+ * inside your existing blue dashboard card.
+ */
+
+.dash-card .incident-table {
+    color: #000000;
+}
+
+.dash-card .incident-table thead th {
+    color: #ffffff;
+}
+
+.dash-card .incident-table tbody td {
+    color: #000000 !important;
+}
+
+
+/* ==========================================================
+   TABLE RESPONSIVENESS
+   ========================================================== */
+
+.incident-table .priority-badge,
+.incident-table .severity-badge,
+.incident-table .status-badge {
+    line-height: 1;
+}
+
+
+/* ==========================================================
+   RESPONSIVE INCIDENT RECORDS
+   ========================================================== */
+
+@media (max-width: 992px) {
+
+    .records-header {
+        align-items: flex-start;
+    }
+
+    .records-header-actions {
+        width: 100%;
+    }
+
+    .archive-btn,
+    .active-btn {
+        justify-content: center;
+    }
+
+}
+
+
+/* ==========================================================
+   MOBILE
+   ========================================================== */
+
+@media (max-width: 768px) {
+
+    .records-header {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 10px;
+    }
+
+
+    .records-header-actions {
+        width: 100%;
+    }
+
+
+    .archive-btn,
+    .active-btn {
+        flex: 1;
+
+        justify-content: center;
+    }
+
+
+    .filter-card {
+        padding: 15px;
+    }
+
+
+    .filter-actions {
+        width: 100%;
+
+        flex-wrap: wrap;
+    }
+
+
+    .filter-btn,
+    .clear-filter-btn {
+        flex: 1;
+
+        justify-content: center;
+    }
+
+
+    .priority-badge,
+    .severity-badge,
+    .status-badge {
+        min-width: 75px;
+
+        padding: 6px 9px;
+
+        font-size: 11px;
+    }
+
+
+    .resolve-btn {
+        padding: 6px 9px;
+
+        font-size: 12px;
+    }
+
+}
+
+
+/* ==========================================================
+   SMALL MOBILE
+   ========================================================== */
+
+@media (max-width: 576px) {
+
+    .records-header-actions {
+        flex-direction: column;
+
+        width: 100%;
+    }
+
+
+    .archive-btn,
+    .active-btn {
+        width: 100%;
+    }
+
+
+    .filter-actions {
+        flex-direction: column;
+    }
+
+
+    .filter-btn,
+    .clear-filter-btn {
+        width: 100%;
+    }
+
+}
