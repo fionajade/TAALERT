@@ -1,287 +1,351 @@
 import { Feather } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   Animated,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
+  Image, Modal, SafeAreaView,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
+import 'react-native-url-polyfill/auto';
 
+import BottomNavbar from '../components/BottomNavbar';
+import { ReportStyles as styles } from '../constants/theme';
 import { supabase } from '../src/services/supabase';
 
-const COLORS = {
-  background: '#F5F7FA',
-  primaryBlue: '#319EFE',
-  darkNavy: '#223354',
-  textDark: '#1A202C',
-  textMuted: '#718096',
-  white: '#FFFFFF',
-  inputBg: '#FFFFFF',
-};
+const REPORT_TYPES = ['Flood', 'Fire', 'Landslide', 'Earthquake', 'Other'];
 
-export default function LoginScreen() {
-  const router = useRouter();
+export default function ReportScreen() {
+    const router = useRouter();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+    const [selectedType, setSelectedType] = useState('Flood');
+    const [location, setLocation] = useState('');
+    const [description, setDescription] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [successVisible, setSuccessVisible] = useState(false);
 
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideUpAnim = useRef(new Animated.Value(30)).current;
-  const [error, setError] = useState('');
+    const scaleAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-      Animated.spring(slideUpAnim, {
-        toValue: 0,
-        friction: 6,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
+    const [image, setImage] = useState<{ uri: string; ext: string } | null>(null);
 
-  const handleLogin = async () => {
-    try {
-      if (!email.trim() || !password.trim()) {
-        setError('Please enter your email and password');
-        return;
-      }
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const slideUpAnim = useRef(new Animated.Value(30)).current;
 
-      setLoading(true);
-      setError('');
+    const showSuccessModal = () => {
+        setSuccessVisible(true);
 
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
+        scaleAnim.setValue(0);
 
-      if (error) {
-        setError(error.message);
-        return;
-      }
-      // BASTA PAG SUCCESSFUL PUNTA HOME
-      router.replace('/home');
+        Animated.sequence([
+            Animated.spring(scaleAnim, {
+                toValue: 1.15,
+                friction: 4,
+                useNativeDriver: true,
+            }),
+            Animated.spring(scaleAnim, {
+                toValue: 1,
+                friction: 6,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    };
 
-    } catch (err) {
-      console.log('Catch Error:', err);
-      setError('Something went wrong');
-    } finally {
-      setLoading(false);
-    }
-  };
+    useEffect(() => {
+        Animated.parallel([
+            Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
+            Animated.spring(slideUpAnim, { toValue: 0, friction: 6, useNativeDriver: true }),
+        ]).start();
+    }, []);
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+    const pickImage = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission Denied', 'We need permissions to open your gallery.');
+            return;
+        }
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
-        <Animated.View
-          style={[
-            styles.innerContainer,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideUpAnim }],
-            },
-          ]}
-        >
-          {/* Icon */}
-          <View style={styles.logoContainer}>
-            <View style={styles.iconCircle}>
-              <Feather name="shield" size={40} color={COLORS.primaryBlue} />
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 0.2,
+        });
+
+        if (!result.canceled) {
+            const uri = result.assets[0].uri;
+            const ext = uri.split('.').pop()?.toLowerCase() || 'jpeg';
+
+            setImage({
+                uri: uri,
+                ext: ext === 'jpg' ? 'jpeg' : ext,
+            });
+        }
+    };
+
+    const handleSubmit = async () => {
+
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+            Alert.alert("Error", "You must be logged in.");
+            return;
+        }
+        if (!location.trim() || !description.trim()) {
+            Alert.alert("Missing Information", "Please fill in both the location and description.");
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            let photoUrl = null;
+
+            if (image) {
+                const fileName = `${Date.now()}.${image.ext}`;
+                const response = await fetch(image.uri);
+                const blob = await response.blob();
+                const { error: uploadError } = await supabase
+                    .storage
+                    .from('report-images')
+                    .upload(fileName, blob, {
+                        contentType: `image/${image.ext}`,
+                        upsert: true,
+                    });
+
+                if (uploadError) {
+                    Alert.alert("Storage Error!", uploadError.message);
+                    setLoading(false);
+                    return;
+                }
+
+                const { data: publicUrlData } = supabase
+                    .storage
+                    .from('report-images')
+                    .getPublicUrl(fileName);
+
+                photoUrl = publicUrlData.publicUrl;
+            }
+
+            const { error: dbError } = await supabase
+                .from('incidents')
+                .insert([
+                    {
+                        user_id: user.id,
+                        category: selectedType, // <--- FIXED: Changed from 'type' to 'category'
+                        location: location.trim(),
+                        description: description.trim(),
+                        photo_url: photoUrl,
+                        status: 'pending',     // <--- ADDED: To utilize the new schema
+                        priority: 'medium'     // <--- ADDED: Default priority
+                    }
+                ]);
+
+            if (dbError) {
+                Alert.alert("Database Error!", dbError.message);
+                console.error("DB Error: ", dbError); // Helps with debugging if it fails again
+                setLoading(false);
+                return;
+            }
+
+            setLocation('');
+            setDescription('');
+            setImage(null);
+
+            showSuccessModal();
+
+        } catch (error: any) {
+            Alert.alert("System Error", error.message || "An unexpected error occurred.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity style={styles.backBtn} onPress={() => router.replace('/home')}>
+                    <Feather name="arrow-left" size={22} color="#1E293B" />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Submit a Report</Text>
             </View>
-          </View>
 
-          {/* Header */}
-          <View style={styles.headerContainer}>
-            <Text style={styles.welcomeText}>Welcome Back 👋</Text>
-            <Text style={styles.subText}>
-              Log in to receive real-time disaster alerts and stay safe.
-            </Text>
-          </View>
+            <Animated.View style={{ flex: 1, opacity: fadeAnim, transform: [{ translateY: slideUpAnim }] }}>
+                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
-          {/* Form */}
-          <View style={styles.formContainer}>
-            {/* Email */}
-            <View style={styles.inputWrapper}>
-              <Feather name="mail" size={20} color={COLORS.textMuted} />
-              <TextInput
-                style={styles.input}
-                placeholder="Email address"
-                placeholderTextColor={COLORS.textMuted}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={email}
-                onChangeText={setEmail}
-              />
+                    <Text style={styles.label}>TYPE</Text>
+                    <View style={styles.typeGrid}>
+                        {REPORT_TYPES.map((type) => (
+                            <TouchableOpacity
+                                key={type}
+                                style={[styles.typeChip, selectedType === type && styles.typeChipActive]}
+                                onPress={() => setSelectedType(type)}
+                            >
+                                <Text style={[styles.typeChipText, selectedType === type && styles.typeChipTextActive]}>
+                                    {type}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+                    <Text style={styles.label}>LOCATION</Text>
+                    <View style={styles.inputContainer}>
+                        <Feather name="map-pin" size={18} color="#25A5FE" style={styles.inputIcon} />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Brgy. San Nicolas, Batangas"
+                            placeholderTextColor="#1E293B"
+                            value={location}
+                            onChangeText={setLocation}
+                        />
+                    </View>
+
+                    <Text style={styles.label}>DESCRIPTION</Text>
+                    <View style={styles.textAreaContainer}>
+                        <TextInput
+                            style={styles.textArea}
+                            placeholder="Describe what you observed..."
+                            placeholderTextColor="#94A3B8"
+                            multiline
+                            numberOfLines={4}
+                            textAlignVertical="top"
+                            value={description}
+                            onChangeText={setDescription}
+                        />
+                    </View>
+
+                    <Text style={styles.label}>PHOTO</Text>
+                    <TouchableOpacity
+                        style={[styles.photoBox, image && { padding: 0, overflow: 'hidden' }]}
+                        onPress={pickImage}
+                    >
+                        {image ? (
+                            <>
+                                <Image source={{ uri: image.uri }} style={{ width: '100%', height: 150 }} />
+                                <View style={{ position: 'absolute', backgroundColor: 'rgba(0,0,0,0.5)', padding: 8, borderRadius: 20 }}>
+                                    <Feather name="edit-2" size={20} color="#fff" />
+                                </View>
+                            </>
+                        ) : (
+                            <>
+                                <Feather name="camera" size={32} color="#25A5FE" />
+                                <Text style={styles.photoText}>Take photo or upload</Text>
+                            </>
+                        )}
+                    </TouchableOpacity>
+
+                    <View style={{ height: 120 }} />
+                </ScrollView>
+            </Animated.View>
+
+            <View style={styles.footer}>
+                <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={loading}>
+                    {loading ? (
+                        <ActivityIndicator color="#fff" />
+                    ) : (
+                        <Text style={styles.submitBtnText}>Submit Report</Text>
+                    )}
+                </TouchableOpacity>
             </View>
 
-            {/* Password */}
-            <View style={styles.inputWrapper}>
-              <Feather name="lock" size={20} color={COLORS.textMuted} />
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                placeholderTextColor={COLORS.textMuted}
-                secureTextEntry={!showPassword}
-                value={password}
-                onChangeText={setPassword}
-                autoCapitalize="none"
-              />
-
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <Feather
-                  name={showPassword ? 'eye' : 'eye-off'}
-                  size={20}
-                  color={COLORS.textMuted}
-                />
-              </TouchableOpacity>
-            </View>
-
-            {/* Forgot */}
-            <TouchableOpacity style={styles.forgotPasswordBtn}>
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
-
-            {error ? (
-              <Text style={styles.errorText}>{error}</Text>
-            ) : null}
-
-            {/* Login */}
-            <TouchableOpacity
-              style={styles.loginBtn}
-              onPress={handleLogin}
-              activeOpacity={0.8}
-              disabled={loading}
+            <Modal
+                visible={successVisible}
+                transparent
+                animationType="fade"
             >
-              <Text style={styles.loginBtnText}>
-                {loading ? 'Logging in...' : 'Log In'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+                <View
+                    style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(0,0,0,0.45)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Animated.View
+                        style={{
+                            width: 300,
+                            backgroundColor: '#fff',
+                            borderRadius: 24,
+                            padding: 30,
+                            alignItems: 'center',
+                            transform: [{ scale: scaleAnim }],
+                        }}
+                    >
+                        <View
+                            style={{
+                                width: 90,
+                                height: 90,
+                                borderRadius: 45,
+                                backgroundColor: '#22C55E',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                marginBottom: 20,
+                            }}
+                        >
+                            <Feather
+                                name="check"
+                                size={50}
+                                color="#fff"
+                            />
+                        </View>
 
-          {/* Signup */}
-          <View style={styles.footerContainer}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
+                        <Text
+                            style={{
+                                fontSize: 24,
+                                fontWeight: '700',
+                                color: '#0F172A',
+                                marginBottom: 8,
+                            }}
+                        >
+                            Report Submitted
+                        </Text>
 
-            <TouchableOpacity onPress={() => router.push('/signup')}>
-              <Text style={styles.signUpText}>Sign up</Text>
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
-  );
+                        <Text
+                            style={{
+                                textAlign: 'center',
+                                color: '#64748B',
+                                fontSize: 15,
+                                marginBottom: 25,
+                                lineHeight: 22,
+                            }}
+                        >
+                            Thank you! Your report has been successfully submitted and will help keep everyone informed.
+                        </Text>
+
+                        <TouchableOpacity
+                            style={{
+                                backgroundColor: '#25A5FE',
+                                width: '100%',
+                                paddingVertical: 14,
+                                borderRadius: 14,
+                                alignItems: 'center',
+                            }}
+                            onPress={() => {
+                                setSuccessVisible(false);
+                                router.replace('/home');
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    color: '#fff',
+                                    fontWeight: '700',
+                                    fontSize: 16,
+                                }}
+                            >
+                                OK
+                            </Text>
+                        </TouchableOpacity>
+                    </Animated.View>
+                </View>
+            </Modal>
+            <BottomNavbar activeTab="plus" />
+        </SafeAreaView>
+    );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
-    marginBottom: 16,
-    fontSize: 14,
-  },
-  innerContainer: {
-    flex: 1,
-    paddingHorizontal: 24,
-    justifyContent: 'center',
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: COLORS.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  headerContainer: {
-    marginBottom: 40,
-  },
-  welcomeText: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: COLORS.textDark,
-  },
-  subText: {
-    fontSize: 15,
-    color: COLORS.textMuted,
-    marginTop: 8,
-  },
-  formContainer: {
-    marginBottom: 24,
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.inputBg,
-    borderRadius: 16,
-    marginBottom: 16,
-    paddingHorizontal: 16,
-    height: 60,
-    gap: 10,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: COLORS.textDark,
-  },
-  forgotPasswordBtn: {
-    alignSelf: 'flex-end',
-    marginBottom: 32,
-  },
-  forgotPasswordText: {
-    color: COLORS.primaryBlue,
-    fontWeight: '600',
-  },
-  loginBtn: {
-    backgroundColor: COLORS.primaryBlue,
-    borderRadius: 16,
-    height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loginBtnText: {
-    color: COLORS.white,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  footerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  footerText: {
-    color: COLORS.textMuted,
-  },
-  signUpText: {
-    color: COLORS.primaryBlue,
-    fontWeight: 'bold',
-  },
-});
