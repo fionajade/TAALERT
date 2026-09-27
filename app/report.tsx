@@ -139,18 +139,18 @@ export default function ReportScreen() {
                 .insert([
                     {
                         user_id: user.id,
-                        category: selectedType, // <--- FIXED: Changed from 'type' to 'category'
+                        category: selectedType, 
                         location: location.trim(),
                         description: description.trim(),
                         photo_url: photoUrl,
-                        status: 'pending',     // <--- ADDED: To utilize the new schema
-                        priority: 'medium'     // <--- ADDED: Default priority
+                        status: 'pending',     
+                        priority: 'medium'     
                     }
                 ]);
 
             if (dbError) {
                 Alert.alert("Database Error!", dbError.message);
-                console.error("DB Error: ", dbError); // Helps with debugging if it fails again
+                console.error("DB Error: ", dbError); 
                 setLoading(false);
                 return;
             }
