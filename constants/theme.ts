@@ -762,3 +762,92 @@ export const ResourceStyles = StyleSheet.create({
   cardTitle: { fontSize: 16, fontWeight: 'bold', color: '#1E293B' },
   cardDesc: { fontSize: 13, color: '#64748B', marginTop: 2 },
 });
+
+
+/* For Eruption Guide Screen */
+export const GuideStyles = StyleSheet.create({
+  container: { 
+    flex: 1, 
+    backgroundColor: '#F0F9FF' 
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 15,
+  },
+  backBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#E0F2FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginLeft: 15,
+  },
+  scrollContent: { 
+    paddingHorizontal: 20, 
+    paddingBottom: 40,
+    paddingTop: 10
+  },
+  
+  // Phase Cards
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 24,
+    padding: 24,
+    marginBottom: 20,
+    elevation: 3,
+    shadowColor: '#000', 
+    shadowOpacity: 0.05, 
+    shadowRadius: 10,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    borderBottomWidth: 1.5,
+    borderBottomColor: '#F1F5F9',
+    paddingBottom: 16,
+  },
+  iconBox: {
+    width: 50,
+    height: 50,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginLeft: 15,
+  },
+  
+  // List items inside cards
+  tipRow: {
+    flexDirection: 'row',
+    marginBottom: 14,
+    alignItems: 'flex-start',
+  },
+  bulletPoint: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#25A5FE',
+    marginTop: 8,
+    marginRight: 12,
+  },
+  tipText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#475569',
+    lineHeight: 22,
+  }
+});

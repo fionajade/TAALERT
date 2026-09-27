@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
 import {
   Animated,
@@ -12,9 +13,11 @@ import BottomNavbar from '../components/BottomNavbar';
 import { ResourceStyles as styles } from '../constants/theme';
 
 export default function ResourcesScreen() {
+  const router = useRouter(); // <-- Use this instead
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
-
+  // ... rest of code
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
@@ -56,6 +59,7 @@ export default function ResourcesScreen() {
               icon="alert-triangle"
               iconColor="#D97706"
               iconBg="#FEF3C7"
+              onPress={() => router.push('/EruptionGuide')} // <-- Add this
             />
             <ResourceItem 
               title="Emergency Go-Bag"
@@ -90,8 +94,8 @@ export default function ResourcesScreen() {
 }
 
 // List Items
-const ResourceItem = ({ title, desc, icon, iconColor, iconBg }: any) => (
-  <TouchableOpacity style={styles.card}>
+const ResourceItem = ({ title, desc, icon, iconColor, iconBg, onPress }: any) => (
+  <TouchableOpacity style={styles.card} onPress={onPress}>
     <View style={[styles.iconBox, { backgroundColor: iconBg }]}>
       <Feather name={icon} size={20} color={iconColor} />
     </View>
