@@ -17,21 +17,17 @@ export default function ResourcesScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
 
-  // useFocusEffect runs EVERY time you navigate to this screen or go BACK to it
   useFocusEffect(
     useCallback(() => {
-      // 1. Reset the animation to invisible and pushed down
       fadeAnim.setValue(0);
       slideUpAnim.setValue(30);
 
-      // 2. Play the animation
       Animated.parallel([
         Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
         Animated.spring(slideUpAnim, { toValue: 0, friction: 6, useNativeDriver: true }),
       ]).start();
       
       return () => {
-        // Optional cleanup
       };
     }, [fadeAnim, slideUpAnim]) // Dependencies
   );
@@ -70,7 +66,7 @@ export default function ResourcesScreen() {
               icon="alert-triangle"
               iconColor="#D97706"
               iconBg="#FEF3C7"
-              onPress={() => router.push('/EruptionGuide')} // <-- Opens your new guide!
+              onPress={() => router.push('/EruptionGuide')} 
             />
             <ResourceItem 
               title="Emergency Go-Bag"
