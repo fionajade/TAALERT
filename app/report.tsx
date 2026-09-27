@@ -19,12 +19,12 @@ import BottomNavbar from '../components/BottomNavbar';
 import { ReportStyles as styles } from '../constants/theme';
 import { supabase } from '../src/services/supabase';
 
-const REPORT_TYPES = ['Ashfall', 'Tremor', 'Smoke', 'Injury', 'Other'];
+const REPORT_TYPES = ['Flood', 'Fire', 'Landslide', 'Earthquake', 'Other'];
 
 export default function ReportScreen() {
     const router = useRouter();
 
-    const [selectedType, setSelectedType] = useState('Ashfall');
+    const [selectedType, setSelectedType] = useState('Flood');
     const [location, setLocation] = useState('');
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
