@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useRef } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router'; // <-- Added useFocusEffect
+import React, { useCallback, useRef } from 'react'; // <-- Added useCallback
 import {
   Animated,
   SafeAreaView,
@@ -13,17 +13,28 @@ import BottomNavbar from '../components/BottomNavbar';
 import { ResourceStyles as styles } from '../constants/theme';
 
 export default function ResourcesScreen() {
-  const router = useRouter(); // <-- Use this instead
-
+  const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
-  // ... rest of code
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
-      Animated.spring(slideUpAnim, { toValue: 0, friction: 6, useNativeDriver: true }),
-    ]).start();
-  }, []);
+
+  // useFocusEffect runs EVERY time you navigate to this screen or go BACK to it
+  useFocusEffect(
+    useCallback(() => {
+      // 1. Reset the animation to invisible and pushed down
+      fadeAnim.setValue(0);
+      slideUpAnim.setValue(30);
+
+      // 2. Play the animation
+      Animated.parallel([
+        Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
+        Animated.spring(slideUpAnim, { toValue: 0, friction: 6, useNativeDriver: true }),
+      ]).start();
+      
+      return () => {
+        // Optional cleanup
+      };
+    }, [fadeAnim, slideUpAnim]) // Dependencies
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -59,7 +70,7 @@ export default function ResourcesScreen() {
               icon="alert-triangle"
               iconColor="#D97706"
               iconBg="#FEF3C7"
-              onPress={() => router.push('/EruptionGuide')} // <-- Add this
+              onPress={() => router.push('/EruptionGuide')} // <-- Opens your new guide!
             />
             <ResourceItem 
               title="Emergency Go-Bag"
