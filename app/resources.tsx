@@ -26,7 +26,7 @@ export default function ResourcesScreen() {
         Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
         Animated.spring(slideUpAnim, { toValue: 0, friction: 6, useNativeDriver: true }),
       ]).start();
-      
+
       return () => {
       };
     }, [fadeAnim, slideUpAnim]) // Dependencies
@@ -47,7 +47,7 @@ export default function ResourcesScreen() {
 
       <Animated.View style={{ flex: 1, opacity: fadeAnim, transform: [{ translateY: slideUpAnim }] }}>
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          
+
           {/* Featured Card */}
           <View style={styles.featuredCard}>
             <Text style={styles.featuredLabel}>FEATURED</Text>
@@ -60,29 +60,37 @@ export default function ResourcesScreen() {
 
           {/* Resource List */}
           <View style={styles.listContainer}>
-            <ResourceItem 
+            <ResourceItem
               title="Before an eruption"
               desc="Know the warning signs and alert levels."
               icon="alert-triangle"
               iconColor="#D97706"
               iconBg="#FEF3C7"
-              onPress={() => router.push('/EruptionGuide')} 
+              onPress={() => router.push('/EruptionGuide')}
             />
-            <ResourceItem 
+            <ResourceItem
+              title="Frequently Asked Questions"
+              desc="Find answers to common questions about volcanic eruptions."
+              icon="help-circle"
+              iconColor="#7C3AED"
+              iconBg="#d9c6fa"
+              onPress={() => router.push('/FAQs')}
+            />
+            <ResourceItem
               title="Emergency Go-Bag"
               desc="12 essentials every household needs."
               icon="briefcase"
               iconColor="#2563EB"
               iconBg="#DBEAFE"
             />
-            <ResourceItem 
+            <ResourceItem
               title="Evacuation Plan"
               desc="Plan routes for your family."
               icon="home"
               iconColor="#059669"
               iconBg="#D1FAE5"
             />
-            <ResourceItem 
+            <ResourceItem
               title="First Aid Basics"
               desc="Treat ash exposure & burns."
               icon="heart"
