@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
-import { useFocusEffect, useRouter } from 'expo-router'; // <-- Added useFocusEffect
-import React, { useCallback, useRef } from 'react'; // <-- Added useCallback
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback, useRef } from 'react';
 import {
   Animated,
   SafeAreaView,
@@ -29,7 +29,7 @@ export default function ResourcesScreen() {
 
       return () => {
       };
-    }, [fadeAnim, slideUpAnim]) // Dependencies
+    }, [fadeAnim, slideUpAnim]) 
   );
 
   return (
