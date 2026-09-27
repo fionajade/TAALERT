@@ -87,7 +87,7 @@ export const COLORS = {
 };
 
 export const IndexStyles = StyleSheet.create({
-    container: {
+  container: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
@@ -368,8 +368,83 @@ export const IndexStyles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
+  // --- New SOS Modal Styles ---
+  sosModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  sosModalContent: {
+    backgroundColor: COLORS.cardDark,
+    borderRadius: 32,
+    padding: 32,
+    width: '100%',
+    alignItems: 'center',
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+  },
+  sosModalTitle: {
+    color: COLORS.white,
+    fontSize: 26,
+    fontWeight: '800',
+    marginBottom: 8,
+    textAlign: 'center',
+    letterSpacing: 1,
+  },
+  sosModalDesc: {
+    color: COLORS.white,
+    fontSize: 16,
+    opacity: 0.8,
+    textAlign: 'center',
+    marginBottom: 32,
+    lineHeight: 24,
+  },
+  holdInstruction: {
+    color: COLORS.white,
+    fontSize: 14,
+    opacity: 0.6,
+    marginBottom: 16,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  holdButton: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: COLORS.danger,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 32,
+    elevation: 8,
+    shadowColor: COLORS.danger,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.6,
+    shadowRadius: 15,
+    borderWidth: 4,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  holdButtonText: {
+    color: COLORS.white,
+    fontSize: 48,
+    fontWeight: '800',
+  },
+  cancelSosBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  cancelSosText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
-
 
 
 
