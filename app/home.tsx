@@ -2,7 +2,9 @@ import { supabase } from '@/src/services/supabase';
 import { Feather } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  Alert,
   Animated,
+  Modal,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -22,39 +24,90 @@ const RECENT_ACTIVITY_DATA = [
 export default function DisasterAppUI() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(30)).current;
-  const [userName, setUserName] = useState('User'); 
+  const [userName, setUserName] = useState('User');
 
+  // SOS State
+  const [isSosExpanded, setIsSosExpanded] = useState(false);
+  const [holdProgress, setHoldProgress] = useState(5);
+  const timerRef = useRef<any>(null);
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
       Animated.spring(slideUpAnim, { toValue: 0, friction: 6, useNativeDriver: true }),
     ]).start();
 
-  const getUser = async () => {
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+    const getUser = async () => {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
 
-    if (error || !user) return;
+      if (error || !user) return;
 
-    console.log(user); 
+      setUserName(
+        user.user_metadata?.full_name ||
+        user.user_metadata?.name ||
+        user.email?.split('@')[0] ||
+        'User'
+      );
+    };
 
-    setUserName(
-      user.user_metadata?.full_name ||
-      user.user_metadata?.name ||
-      user.email?.split('@')[0] ||
-      'User'
+    getUser();
+
+    // Cleanup timer on unmount
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  // --- SOS Button Logic ---
+  const handlePressIn = () => {
+    let count = 5;
+    setHoldProgress(count);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+
+    timerRef.current = setInterval(() => {
+      count -= 1;
+      if (count > 0) {
+        setHoldProgress(count);
+      } else {
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+        }
+        triggerSos();
+      }
+    }, 1000);
+  };
+
+  const handlePressOut = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    // Reset back to 5 if they let go early
+    setHoldProgress(5);
+  };
+
+  const triggerSos = () => {
+    setIsSosExpanded(false);
+    setHoldProgress(5);
+    Alert.alert(
+      "SOS Sent!",
+      "Emergency responders have been alerted to your location.",
+      [{ text: "OK" }]
     );
   };
 
-  getUser();
-  }, []);
+  const cancelSos = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setIsSosExpanded(false);
+    setHoldProgress(5);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <Animated.View style={{ flex: 1, opacity: fadeAnim, transform: [{ translateY: slideUpAnim }] }}>
-
         <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
         <ScrollView
@@ -96,7 +149,11 @@ export default function DisasterAppUI() {
           {/* --- Quick Actions --- */}
           <Text style={styles.sectionTitle}>QUICK ACTIONS</Text>
           <View style={styles.quickActionsContainer}>
-            <TouchableOpacity style={styles.sosCard}>
+            {/* SOS Trigger Button */}
+            <TouchableOpacity
+              style={styles.sosCard}
+              onPress={() => setIsSosExpanded(true)}
+            >
               <View style={styles.sosIconContainer}>
                 <Feather name="alert-circle" color={COLORS.white} size={28} />
               </View>
@@ -166,6 +223,43 @@ export default function DisasterAppUI() {
       </Animated.View>
 
       <BottomNavbar activeTab="home" />
+
+      {/* --- Expanded SOS Confirmation Modal --- */}
+      <Modal
+        visible={isSosExpanded}
+        transparent
+        animationType="fade"
+        onRequestClose={cancelSos}
+      >
+        <View style={styles.sosModalOverlay}>
+          <View style={styles.sosModalContent}>
+            <Feather name="alert-triangle" color={COLORS.danger} size={48} style={{ marginBottom: 16 }} />
+
+            <Text style={styles.sosModalTitle}>EMERGENCY SOS</Text>
+            <Text style={styles.sosModalDesc}>
+              Are you sure you need emergency assistance?
+            </Text>
+
+            <Text style={styles.holdInstruction}>
+              Press and hold for 5 seconds
+            </Text>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPressIn={handlePressIn}
+              onPressOut={handlePressOut}
+              style={styles.holdButton}
+            >
+              <Text style={styles.holdButtonText}>{holdProgress}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.cancelSosBtn} onPress={cancelSos}>
+              <Text style={styles.cancelSosText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
