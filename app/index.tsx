@@ -82,7 +82,7 @@ export default function WelcomeScreen() {
               <Feather name="chevron-right" color={COLORS.textMuted} size={20} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.resourceCard} onPress={() => navigation.navigate('EmergencyInfo')}>
+            <TouchableOpacity style={styles.resourceCard} onPress={() => router.push('/FAQs')}>
               <View style={[styles.resourceIconBox, { backgroundColor: '#FFF4E5' }]}>
                 <Feather name="info" color="#F59E0B" size={24} />
               </View>
