@@ -61,7 +61,7 @@ export default function SignUpScreen() {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [1, 1], // 1:1 ratio works best for avatars/profiles
+      aspect: [1, 1], 
       quality: 0.2,
     });
 
@@ -85,7 +85,6 @@ export default function SignUpScreen() {
     setLoading(true);
 
     try {
-      // 1. Sign up the user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -102,14 +101,11 @@ export default function SignUpScreen() {
         return;
       }
 
-      // 2. Upload Profile Photo if an image was selected
-      // Note: This works best if email confirmation is disabled so the user is logged in automatically.
       if (image && authData.user) {
         const fileName = `avatar-${authData.user.id}-${Date.now()}.${image.ext}`;
         const response = await fetch(image.uri);
         const blob = await response.blob();
         
-        // Ensure you have a storage bucket named 'avatars' in your Supabase project!
         const { error: uploadError } = await supabase
           .storage
           .from('avatars') 
@@ -124,18 +120,15 @@ export default function SignUpScreen() {
             .from('avatars')
             .getPublicUrl(fileName);
 
-          // Update the user's auth metadata with the avatar URL
           await supabase.auth.updateUser({
             data: { avatar_url: publicUrlData.publicUrl }
           });
         } else {
           console.log("Image Upload Error:", uploadError.message);
-          // We don't block the sign-up success message if just the image fails
         }
       }
 
       Alert.alert('Success!', 'Your account has been created.');
-      // pag nakadisable email confirmation sa supabase
       router.replace('/home'); 
 
     } catch (error: any) {
