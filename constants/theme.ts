@@ -926,3 +926,150 @@ export const GuideStyles = StyleSheet.create({
     lineHeight: 22,
   }
 });
+
+/* For Welcome / Pre-Login Screen */
+export const WelcomeStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  scrollContent: {
+    padding: 24,
+    paddingTop: 40,
+  },
+  heroSection: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  logoContainer: {
+    width: 90,
+    height: 90,
+    backgroundColor: COLORS.primaryBlue,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    elevation: 8,
+    shadowColor: COLORS.primaryBlue,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+  },
+  appName: {
+    fontSize: 32,
+    fontWeight: '900',
+    color: COLORS.textDark,
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  tagline: {
+    fontSize: 16,
+    color: COLORS.textMuted,
+    fontWeight: '500',
+  },
+  authContainer: {
+    backgroundColor: COLORS.white,
+    borderRadius: 24,
+    padding: 24,
+    marginBottom: 32,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+  },
+  unlockText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    lineHeight: 22,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  highlightText: {
+    color: COLORS.textDark,
+    fontWeight: '700',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  loginBtn: {
+    flex: 1,
+    backgroundColor: COLORS.primaryBlue,
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: COLORS.primaryBlue,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+  },
+  loginBtnText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  signUpBtn: {
+    flex: 1,
+    backgroundColor: '#E8F1FF',
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  signUpBtnText: {
+    color: COLORS.primaryBlue,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  publicResourcesHeader: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.textMuted,
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  sectionSub: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+  },
+  resourcesContainer: {
+    gap: 12,
+  },
+  resourceCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    padding: 20,
+    borderRadius: 20,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+  },
+  resourceIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  resourceTextContent: {
+    flex: 1,
+    marginLeft: 16,
+    marginRight: 8,
+  },
+  resourceTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.textDark,
+    marginBottom: 4,
+  },
+  resourceDesc: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    lineHeight: 18,
+  },
+});
